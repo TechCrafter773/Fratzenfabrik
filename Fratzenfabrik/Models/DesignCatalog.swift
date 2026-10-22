@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Alle Schmink-Ideen. Die Anzahl der Schritte muss zu den Ebenen in `FacePainter` passen.
 enum DesignCatalog {
-    static let all: [FaceDesign] = [ghost, cat, pumpkin, witch, spiderweb, bat, vampire, skeleton, frankenstein]
+    static let all: [FaceDesign] = [ghost, cat, cyclops, pumpkin, witch, devil, mummy, spiderweb, bat, vampire, werewolf, skeleton, sugarSkull, frankenstein]
 
     static func design(_ id: DesignID) -> FaceDesign { all.first { $0.id == id }! }
 
@@ -254,6 +254,144 @@ enum DesignCatalog {
              "Schwamm"),
             ("Schrauben",
              "Links und rechts unten am Kiefer je eine graue Schraube mit schwarzer Kontur malen.",
+             "Feiner Pinsel"),
+        ])
+    )
+
+    static let cyclops = FaceDesign(
+        id: .cyclops,
+        name: "Zyklopen-Monster",
+        emoji: "👁️",
+        tagline: "Ein drittes Auge auf der Stirn – es guckt sogar herum!",
+        difficulty: .superEasy,
+        minutes: 5,
+        accent: Spook.slime,
+        colors: [Paint.white, Paint.green, Paint.black, Paint.purple],
+        tools: ["Feiner Pinsel", "Dicker Pinsel"],
+        tip: "Ein kleiner weißer Lichtpunkt in der Pupille macht das Auge sofort lebendig.",
+        steps: .steps([
+            ("Riesenauge",
+             "Mitten auf die Stirn ein großes weißes Oval malen und schwarz umranden.",
+             "Dicker Pinsel"),
+            ("Iris & Pupille",
+             "In das Weiß einen grünen Kreis und darin einen schwarzen Punkt malen. Ein weißes Lichtpünktchen dazu.",
+             "Feiner Pinsel"),
+            ("Wimpern & Braue",
+             "Oben am Auge lange geschwungene Wimpern und darüber eine wilde, wellige Braue malen.",
+             "Feiner Pinsel"),
+            ("Monsterpunkte",
+             "Ein paar lila und grüne Punkte auf Wangen und Nase tupfen – fertig ist das Monster.",
+             "Feiner Pinsel"),
+        ])
+    )
+
+    static let devil = FaceDesign(
+        id: .devil,
+        name: "Kleines Teufelchen",
+        emoji: "😈",
+        tagline: "Rote Bäckchen, Hörnchen und ein freches Spitzbärtchen.",
+        difficulty: .easy,
+        minutes: 10,
+        accent: Spook.blood,
+        colors: [Paint.red, Paint.darkRed, Paint.black],
+        tools: ["Schwamm", "Dicker Pinsel", "Feiner Pinsel"],
+        tip: "Die Hörnchen sitzen am besten direkt am Haaransatz – dann sieht es aus, als würden sie aus dem Kopf wachsen.",
+        steps: .steps([
+            ("Teufelsrot",
+             "Das Gesicht mit roter Farbe betupfen, Augen und Lippen frei lassen. Ruhig etwas fleckig – das wirkt feurig.",
+             "Schwamm"),
+            ("Hörnchen",
+             "Zwei gebogene, spitze Hörner auf die Stirn malen, mit Dunkelrot füllen und schwarz umranden.",
+             "Dicker Pinsel"),
+            ("Freche Brauen",
+             "Zwei dicke schwarze Brauen malen, die zur Nase hin nach unten zeigen – so guckt das Teufelchen frech.",
+             "Dicker Pinsel"),
+            ("Spitzbart & Grinsen",
+             "Unter die Lippe ein schwarzes Spitzbärtchen malen und die Mundwinkel mit einem kleinen Haken nach oben ziehen.",
+             "Feiner Pinsel"),
+        ])
+    )
+
+    static let mummy = FaceDesign(
+        id: .mummy,
+        name: "Mini-Mumie",
+        emoji: "🩹",
+        tagline: "Eingewickelt wie ein uraltes Pharaonen-Baby.",
+        difficulty: .easy,
+        minutes: 15,
+        accent: Color(hex: 0xE8D9B5),
+        colors: [Paint.beige, Paint.white, Paint.grey, Paint.black],
+        tools: ["Schwamm", "Flacher Pinsel", "Feiner Pinsel"],
+        tip: "Mit einem flachen Pinsel gelingen die Binden in einem Zug. Lass sie ruhig schief und durcheinander laufen.",
+        steps: .steps([
+            ("Staubige Haut",
+             "Das Gesicht dünn mit Beige betupfen – so sieht die Haut uralt aus.",
+             "Schwamm"),
+            ("Dunkle Augenpartie",
+             "Rund um die Augen grau-schwarz tupfen und weich verwischen. Hier blitzen später die Augen zwischen den Binden hervor.",
+             "Schwamm"),
+            ("Binden",
+             "Mit dem flachen Pinsel weiße Streifen quer übers Gesicht malen – leicht schräg und kreuz und quer. Die Augen frei lassen.",
+             "Flacher Pinsel"),
+            ("Schattenlinien",
+             "An die Oberkante jeder Binde eine dünne graue Linie malen. Dadurch wirken die Binden plastisch.",
+             "Feiner Pinsel"),
+        ])
+    )
+
+    static let werewolf = FaceDesign(
+        id: .werewolf,
+        name: "Wilder Werwolf",
+        emoji: "🐺",
+        tagline: "Fell, Schnauze und Reißzähne – Auuuuu!",
+        difficulty: .medium,
+        minutes: 20,
+        accent: Color(hex: 0xC08A5B),
+        colors: [Paint.brown, Paint.darkBrown, Paint.beige, Paint.black, Paint.white],
+        tools: ["Schwamm", "Feiner Pinsel", "Dicker Pinsel"],
+        tip: "Fellstriche immer kurz und schnell malen und am Ende den Pinsel wegschnippen – so werden sie haarig.",
+        steps: .steps([
+            ("Fell grundieren",
+             "Stirn, Schläfen und Wangen braun betupfen. Rund um Nase und Mund bleibt eine Fläche frei.",
+             "Schwamm"),
+            ("Helle Schnauze",
+             "Den freien Bereich um Nase und Mund mit Beige ausfüllen und die Ränder ins Braun verwischen.",
+             "Schwamm"),
+            ("Fellstriche",
+             "Mit Dunkelbraun viele kurze Striche am Gesichtsrand und über den Augenbrauen malen – wie zotteliges Fell.",
+             "Feiner Pinsel"),
+            ("Wolfsnase & Zähne",
+             "Die Nasenspitze schwarz malen, einen Strich zur Oberlippe ziehen, Lippen schwarz. Zwei weiße Reißzähne an die Mundwinkel.",
+             "Feiner Pinsel"),
+        ])
+    )
+
+    static let sugarSkull = FaceDesign(
+        id: .sugarSkull,
+        name: "Zuckerschädel",
+        emoji: "🌸",
+        tagline: "Bunt, blumig und ein bisschen gruselig – wie in Mexiko.",
+        difficulty: .medium,
+        minutes: 25,
+        accent: Spook.candy,
+        colors: [Paint.white, Paint.black, Paint.pink, Paint.turquoise, Paint.yellow],
+        tools: ["Schwamm", "Dicker Pinsel", "Feiner Pinsel"],
+        tip: "Erst alle bunten Flächen malen, trocknen lassen und dann zum Schluss die schwarzen Konturen – das wirkt ordentlich.",
+        steps: .steps([
+            ("Weiß grundieren",
+             "Das ganze Gesicht weiß betupfen, die Augen frei lassen.",
+             "Schwamm"),
+            ("Blütenaugen",
+             "Um jedes Auge einen türkisen Kreis malen und rundherum rosa Blütenblätter tupfen.",
+             "Dicker Pinsel"),
+            ("Herz-Nase",
+             "Auf die Nasenspitze ein schwarzes, auf dem Kopf stehendes Herz malen.",
+             "Feiner Pinsel"),
+            ("Genähter Mund",
+             "Einen schwarzen Strich über die Lippen bis in die Wangen ziehen und mit kleinen Kreuzchen ‚zunähen‘.",
+             "Feiner Pinsel"),
+            ("Verzierungen",
+             "Eine gelbe Blume auf die Stirn, Schnörkel auf die Wangen und eine Punktereihe ans Kinn.",
              "Feiner Pinsel"),
         ])
     )

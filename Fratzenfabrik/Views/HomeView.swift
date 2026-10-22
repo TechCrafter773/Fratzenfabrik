@@ -53,11 +53,7 @@ struct HomeView: View {
 
                         SafetyCard()
 
-                        Text("Mit 💚, 🦇 und ganz viel Schleim gemacht für Vanessa")
-                            .font(Spook.scribble(12))
-                            .foregroundStyle(.white.opacity(0.5))
-                            .multilineTextAlignment(.center)
-                            .padding(.bottom, 30)
+                        Spacer(minLength: 30)
                     }
                     .padding(.horizontal, 16)
                 }

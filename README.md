@@ -4,7 +4,7 @@ Halloween-Kinderschminke zum Nachmalen – und live auf dem Gesicht anprobieren.
 
 ## Was die App kann
 
-- **9 einfache Designs**: Gespenst, Katze, Kürbis, Hexe, Spinnennetz, Fledermaus, Vampir, Skelett, Frankenstein
+- **14 einfache Designs**: Gespenst, Katze, Zyklop, Kürbis, Hexe, Teufelchen, Mumie, Spinnennetz, Fledermaus, Vampir, Werwolf, Skelett, Zuckerschädel, Frankenstein
 - **Schritt-für-Schritt-Anleitungen** mit Farben, Werkzeug und Profi-Tipps. Die Vorschau auf dem Probe-Kind baut sich Schritt für Schritt auf.
 - **Spuk-Spiegel (Live-Kamera)**: Die Kamera (hinten oder vorne) erkennt Gesichter mit Apples Vision-Framework und legt die Schminke live darüber, bei bis zu 4 Kindern gleichzeitig.
   - Mit dem Karussell wechselst du die Designs, mit dem Würfel kommt ein zufälliges.

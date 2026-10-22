@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum DesignID: String, CaseIterable, Identifiable {
-    case ghost, cat, pumpkin, witch, spiderweb, bat, vampire, skeleton, frankenstein
+    case ghost, cat, cyclops, pumpkin, witch, devil, mummy, spiderweb, bat, vampire, werewolf, skeleton, sugarSkull, frankenstein
     var id: String { rawValue }
 }
 
@@ -25,6 +25,10 @@ enum Paint {
     static let pink = PaintColor(name: "Rosa", color: Color(hex: 0xFF8FB8))
     static let yellow = PaintColor(name: "Gelb", color: Color(hex: 0xFFD93B))
     static let brown = PaintColor(name: "Braun", color: Color(hex: 0x6B4226))
+    static let turquoise = PaintColor(name: "Türkis", color: Color(hex: 0x2EC4C6))
+    static let beige = PaintColor(name: "Beige", color: Color(hex: 0xE8D9B5))
+    static let darkRed = PaintColor(name: "Dunkelrot", color: Color(hex: 0x8E0F24))
+    static let darkBrown = PaintColor(name: "Dunkelbraun", color: Color(hex: 0x3B2414))
     static let glitter = PaintColor(name: "Glitzer", color: Color(hex: 0xE9E4FF))
 }
 

@@ -22,6 +22,7 @@ final class FaceTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate,
     private let ciContext = CIContext()
     private let lock = NSLock()
     private var snapshotRequested = false
+    private var isFront = false
 
     static var hasCamera: Bool {
         AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil
@@ -57,15 +58,18 @@ final class FaceTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate,
 
             let actualPosition = input?.device.position ?? position
             if let connection = output.connection(with: .video) {
-                // Bilder kommen hochkant und – bei der Selfie-Kamera – gespiegelt an, genau wie in der Vorschau.
-                if connection.isVideoRotationAngleSupported(90) {
-                    connection.videoRotationAngle = 90
+                // Bilder bleiben im Sensor-Querformat; die Ausrichtung bekommt Vision mitgeteilt.
+                if connection.isVideoRotationAngleSupported(0) {
+                    connection.videoRotationAngle = 0
                 }
                 if connection.isVideoMirroringSupported {
                     connection.automaticallyAdjustsVideoMirroring = false
-                    connection.isVideoMirrored = actualPosition == .front
+                    connection.isVideoMirrored = false
                 }
             }
+            lock.lock()
+            isFront = actualPosition == .front
+            lock.unlock()
             session.commitConfiguration()
             onConfigured?(actualPosition, ok)
         }
@@ -93,23 +97,31 @@ final class FaceTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate,
 
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        let size = CGSize(width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer))
+        let width = CVPixelBufferGetWidth(pixelBuffer)
+        let height = CVPixelBufferGetHeight(pixelBuffer)
 
-        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up, options: [:])
+        lock.lock()
+        let front = isFront
+        let wantsSnapshot = snapshotRequested
+        snapshotRequested = false
+        lock.unlock()
+
+        // Querformat-Puffer für das Hochkant-Display drehen; die Selfie-Kamera zusätzlich spiegeln,
+        // damit die Punkte genau zur (gespiegelten) Vorschau passen.
+        let landscape = width > height
+        let orientation: CGImagePropertyOrientation = landscape ? (front ? .leftMirrored : .right) : .up
+        let size = landscape ? CGSize(width: height, height: width) : CGSize(width: width, height: height)
+
+        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation, options: [:])
         try? handler.perform([request])
         let observations = (request.results ?? [])
             .sorted { $0.boundingBox.width * $0.boundingBox.height > $1.boundingBox.width * $1.boundingBox.height }
             .prefix(4)
         let faces = observations.compactMap(FaceLandmarks.init(observation:))
 
-        lock.lock()
-        let wantsSnapshot = snapshotRequested
-        snapshotRequested = false
-        lock.unlock()
-
         var snapshot: CGImage?
         if wantsSnapshot {
-            let image = CIImage(cvPixelBuffer: pixelBuffer)
+            let image = CIImage(cvPixelBuffer: pixelBuffer).oriented(orientation)
             snapshot = ciContext.createCGImage(image, from: image.extent)
         }
         onFrame?(FrameResult(faces: faces, imageSize: size, snapshot: snapshot))

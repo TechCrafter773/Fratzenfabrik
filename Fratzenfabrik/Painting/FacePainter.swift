@@ -36,6 +36,11 @@ enum FacePainter {
         case .vampire: vampire
         case .skeleton: skeleton
         case .frankenstein: frankenstein
+        case .cyclops: cyclops
+        case .devil: devil
+        case .mummy: mummy
+        case .werewolf: werewolf
+        case .sugarSkull: sugarSkull
         }
     }
 
@@ -508,6 +513,288 @@ enum FacePainter {
             }
             p.fill(bolts + nuts, Paint.grey.color, opacity: 0.97, soft: 0.003)
             p.stroke(bolts + nuts, Paint.black.color, width: 0.016)
+        },
+    ]
+
+    // MARK: - 👁️ Zyklop
+
+    private static func cyclopsEye(_ f: FaceGeometry) -> (center: CGPoint, rx: CGFloat, ry: CGFloat) {
+        (pt(0, f.browY - 0.52), 0.36, 0.26)
+    }
+
+    static let cyclops: [Layer] = [
+        { p in
+            let e = FacePainter.cyclopsEye(p.face)
+            let eye = ellipse(e.center, e.rx, e.ry)
+            p.fill(eye, Paint.white.color, opacity: 0.97, soft: 0.006)
+            p.stroke(eye, Paint.black.color, width: 0.03)
+        },
+        { p in
+            let e = FacePainter.cyclopsEye(p.face)
+            let look = pt(CGFloat(sin(p.time * 0.9)) * 0.12, CGFloat(sin(p.time * 1.3)) * 0.04)
+            let c = pt(e.center.x + look.x, e.center.y + look.y)
+            let inside = p.within(ellipse(e.center, e.rx, e.ry))
+            inside.fill(circle(c, 0.17), Paint.green.color, opacity: 0.97, soft: 0.004)
+            inside.fill(circle(c, 0.08), Paint.black.color, opacity: 0.97, soft: 0.003)
+            inside.fill(circle(pt(c.x + 0.05, c.y - 0.05), 0.03), Paint.white.color, soft: 0.002)
+        },
+        { p in
+            let e = FacePainter.cyclopsEye(p.face)
+            var lashes: [Path] = []
+            for i in 0..<7 {
+                let a = CGFloat.pi + CGFloat(i + 1) * CGFloat.pi / 8
+                let base = pt(e.center.x + cos(a) * e.rx, e.center.y + sin(a) * e.ry)
+                let tip = pt(e.center.x + cos(a) * (e.rx + 0.13), e.center.y + sin(a) * (e.ry + 0.13))
+                lashes.append(line(base, tip))
+            }
+            var brow = Path()
+            for i in 0...20 {
+                let x = -0.5 + CGFloat(i) / 20
+                let q = pt(x, e.center.y - e.ry - 0.2 + sin(CGFloat(i) * 0.9) * 0.025 + x * x * 0.2)
+                if i == 0 { brow.move(to: q) } else { brow.addLine(to: q) }
+            }
+            p.stroke(lashes, Paint.black.color, width: 0.025)
+            p.stroke(brow, Paint.black.color, width: 0.05)
+        },
+        { p in
+            let f = p.face
+            var purple: [Path] = []
+            var green: [Path] = []
+            let spots: [(CGFloat, CGFloat, CGFloat)] = [(0.72, 0.55, 0.07), (0.88, 0.8, 0.045), (0.6, 0.85, 0.04), (0.95, 0.4, 0.035)]
+            for s in [-1.0, 1.0] as [CGFloat] {
+                for (i, spot) in spots.enumerated() {
+                    let c = circle(pt(s * spot.0 * f.faceHalfWidth / 1.12, spot.1), spot.2)
+                    if (i + (s > 0 ? 1 : 0)) % 2 == 0 { purple.append(c) } else { green.append(c) }
+                }
+            }
+            green.append(circle(pt(f.noseTip.x - 0.06, f.noseTip.y - 0.18), 0.03))
+            purple.append(circle(pt(f.noseTip.x + 0.07, f.noseTip.y - 0.1), 0.025))
+            p.fill(purple, Paint.purple.color, soft: 0.004)
+            p.fill(green, Paint.green.color, soft: 0.004)
+        },
+    ]
+
+    // MARK: - 😈 Teufelchen
+
+    private static func hornPaths(_ f: FaceGeometry) -> [Path] {
+        [-1.0, 1.0].map { (s: CGFloat) -> Path in
+            let baseY = f.browY - 0.42
+            var horn = Path()
+            horn.move(to: pt(s * 0.22, baseY))
+            horn.addQuadCurve(to: pt(s * 0.62, f.foreheadTop + 0.02), control: pt(s * 0.25, baseY - 0.4))
+            horn.addQuadCurve(to: pt(s * 0.5, baseY), control: pt(s * 0.62, baseY - 0.2))
+            horn.closeSubpath()
+            return horn
+        }
+    }
+
+    static let devil: [Layer] = [
+        { p in
+            let f = p.face
+            p.without(f.eyeHoles()).without(f.mouthPath()).fill(f.faceOval(), Paint.red.color, opacity: 0.75, soft: 0.05)
+        },
+        { p in
+            let horns = FacePainter.hornPaths(p.face)
+            p.fill(horns, Paint.darkRed.color, opacity: 0.97, soft: 0.004)
+            p.stroke(horns, Paint.black.color, width: 0.025)
+        },
+        { p in
+            let f = p.face
+            let brows = [-1.0, 1.0].map { (s: CGFloat) in
+                curve(pt(s * 0.82, f.browY - 0.14), pt(s * 0.5, f.browY - 0.12), pt(s * 0.2, f.browY + 0.06))
+            }
+            p.stroke(brows, Paint.black.color, width: 0.075)
+        },
+        { p in
+            let f = p.face
+            let m = f.mouthCenter
+            let goatee = polygon([pt(m.x - 0.13, f.mouthBottom + 0.06), pt(m.x + 0.13, f.mouthBottom + 0.06),
+                                  pt(m.x, min(f.chin - 0.04, f.mouthBottom + 0.5))])
+            p.fill(goatee, Paint.black.color, soft: 0.006)
+            let hooks = [-1.0, 1.0].map { (s: CGFloat) -> Path in
+                let corner = pt(m.x + s * f.mouthHalfWidth, m.y)
+                return curve(corner, pt(corner.x + s * 0.1, corner.y + 0.02), pt(corner.x + s * 0.14, corner.y - 0.1))
+            }
+            p.stroke(hooks, Paint.black.color, width: 0.03)
+        },
+    ]
+
+    // MARK: - 🩹 Mumie
+
+    private static func mummyEyes(_ f: FaceGeometry) -> Path {
+        f.eyeHoles(grow: 1.1, padX: 0.14, padY: 0.12)
+    }
+
+    private static func bandages(_ f: FaceGeometry) -> [(path: Path, top: Path)] {
+        var result: [(path: Path, top: Path)] = []
+        var y = f.foreheadTop + 0.05
+        var i = 0
+        while y < f.chin + 0.1 {
+            let tilt: CGFloat = i % 2 == 0 ? 0.07 : -0.09
+            let h: CGFloat = 0.2
+            let band = polygon([pt(-1.5, y - tilt), pt(1.5, y + tilt), pt(1.5, y + tilt + h), pt(-1.5, y - tilt + h)])
+            result.append((path: band, top: line(pt(-1.5, y - tilt), pt(1.5, y + tilt))))
+            y += 0.29
+            i += 1
+        }
+        return result
+    }
+
+    static let mummy: [Layer] = [
+        { p in
+            let f = p.face
+            p.without(f.eyeHoles()).fill(f.faceOval(), Paint.beige.color, opacity: 0.8, soft: 0.05)
+        },
+        { p in
+            let f = p.face
+            let shadows = f.eyes.map { e in ellipse(e.center, e.halfWidth + 0.2, e.halfHeight + 0.17) }
+            p.without(f.eyeHoles()).fill(shadows, Color(hex: 0x2A2422), opacity: 0.85, soft: 0.04)
+        },
+        { p in
+            let f = p.face
+            p.within(f.faceOval()).without(FacePainter.mummyEyes(f))
+                .fill(FacePainter.bandages(f).map { $0.path }, Paint.white.color, opacity: 0.93, soft: 0.01)
+        },
+        { p in
+            let f = p.face
+            p.within(f.faceOval()).without(FacePainter.mummyEyes(f))
+                .stroke(FacePainter.bandages(f).map { $0.top }, Paint.grey.color, width: 0.02, opacity: 0.9)
+        },
+    ]
+
+    // MARK: - 🐺 Werwolf
+
+    private static func muzzle(_ f: FaceGeometry) -> Path {
+        ellipse(pt(f.noseTip.x, (f.noseTip.y + f.mouthCenter.y) / 2 + 0.02), max(0.5, f.mouthHalfWidth + 0.15), 0.48)
+    }
+
+    static let werewolf: [Layer] = [
+        { p in
+            let f = p.face
+            p.without(f.eyeHoles()).without(FacePainter.muzzle(f)).fill(f.faceOval(), Paint.brown.color, opacity: 0.85, soft: 0.06)
+        },
+        { p in
+            p.within(p.face.faceOval()).fill(FacePainter.muzzle(p.face), Paint.beige.color, opacity: 0.88, soft: 0.05)
+        },
+        { p in
+            let f = p.face
+            var fur: [Path] = []
+            for i in 0..<34 {
+                let a = CGFloat(i) / 34 * 2 * .pi
+                let wobble = CGFloat(sin(Double(i) * 2.7)) * 0.04
+                let rx = f.faceHalfWidth - 0.05, ryTop = -f.foreheadTop, ryBottom = f.chin
+                let ry = sin(a) < 0 ? ryTop : ryBottom
+                let start = pt(cos(a) * (rx - 0.18 + wobble), sin(a) * (ry - 0.2) + 0.1)
+                let end = pt(cos(a) * (rx + 0.02), sin(a) * ry + 0.1)
+                fur.append(line(start, end))
+            }
+            for s in [-1.0, 1.0] as [CGFloat] {
+                for k in 0..<4 {
+                    let x = s * (0.3 + CGFloat(k) * 0.13)
+                    fur.append(line(pt(x, f.browY + 0.02), pt(x + s * 0.06, f.browY - 0.16)))
+                }
+            }
+            p.within(f.faceOval(inset: -0.04)).without(f.eyeHoles()).stroke(fur, Paint.darkBrown.color, width: 0.025)
+        },
+        { p in
+            let f = p.face
+            let n = f.noseTip
+            var nose = Path()
+            nose.move(to: pt(n.x - 0.2, n.y - 0.1))
+            nose.addQuadCurve(to: pt(n.x + 0.2, n.y - 0.1), control: pt(n.x, n.y - 0.22))
+            nose.addQuadCurve(to: pt(n.x, n.y + 0.08), control: pt(n.x + 0.16, n.y + 0.06))
+            nose.addQuadCurve(to: pt(n.x - 0.2, n.y - 0.1), control: pt(n.x - 0.16, n.y + 0.06))
+            nose.closeSubpath()
+            p.fill(nose, Paint.black.color, soft: 0.006)
+            p.stroke(line(pt(n.x, n.y + 0.06), pt(n.x, f.mouthTop + 0.01)), Paint.black.color, width: 0.03)
+            p.fill(f.mouthPath(), Paint.black.color, opacity: 0.9, soft: 0.006)
+            let top = f.mouthBottom - 0.06
+            let fangs = [-1.0, 1.0].map { (s: CGFloat) -> Path in
+                let x = f.mouthCenter.x + s * f.mouthHalfWidth * 0.75
+                return polygon([pt(x - 0.055, top), pt(x + 0.055, top), pt(x, top + 0.2)])
+            }
+            p.fill(fangs, Paint.white.color, opacity: 0.98, soft: 0.003)
+            p.stroke(fangs, Paint.black.color, width: 0.012)
+        },
+    ]
+
+    // MARK: - 🌸 Zuckerschädel
+
+    static let sugarSkull: [Layer] = [
+        { p in
+            let f = p.face
+            p.without(f.eyeHoles()).fill(f.faceOval(), Paint.white.color, opacity: 0.94, soft: 0.04)
+        },
+        { p in
+            let f = p.face
+            var petals: [Path] = []
+            var rings: [Path] = []
+            for e in f.eyes {
+                let c = pt(e.center.x, e.center.y - 0.02)
+                rings.append(circle(c, 0.33))
+                for i in 0..<9 {
+                    let a = CGFloat(i) / 9 * 2 * .pi
+                    petals.append(circle(pt(c.x + cos(a) * 0.38, c.y + sin(a) * 0.38), 0.09))
+                }
+            }
+            let around = p.without(f.eyeHoles(padX: 0.02, padY: 0.03))
+            around.fill(petals, Paint.pink.color, opacity: 0.95, soft: 0.004)
+            around.fill(rings, Paint.turquoise.color, opacity: 0.95, soft: 0.004)
+            around.stroke(rings, Paint.black.color, width: 0.02)
+        },
+        { p in
+            let n = p.face.noseTip
+            p.fill([circle(pt(n.x - 0.075, n.y - 0.02), 0.085),
+                    circle(pt(n.x + 0.075, n.y - 0.02), 0.085),
+                    polygon([pt(n.x - 0.155, n.y - 0.04), pt(n.x + 0.155, n.y - 0.04), pt(n.x, n.y - 0.28)])],
+                   Paint.black.color, soft: 0.006)
+        },
+        { p in
+            let f = p.face
+            let m = f.mouthCenter
+            let w = max(0.6, f.mouthHalfWidth + 0.25)
+            func y(_ x: CGFloat) -> CGFloat { m.y - pow((x - m.x) / w, 2) * 0.1 }
+            var main = Path()
+            for i in 0...20 {
+                let x = m.x - w + 2 * w * CGFloat(i) / 20
+                if i == 0 { main.move(to: pt(x, y(x))) } else { main.addLine(to: pt(x, y(x))) }
+            }
+            var crosses: [Path] = []
+            for i in 1..<8 {
+                let x = m.x - w + 2 * w * CGFloat(i) / 8
+                crosses.append(line(pt(x - 0.04, y(x) - 0.07), pt(x + 0.04, y(x) + 0.07)))
+                crosses.append(line(pt(x + 0.04, y(x) - 0.07), pt(x - 0.04, y(x) + 0.07)))
+            }
+            p.stroke([main], Paint.black.color, width: 0.03)
+            p.stroke(crosses, Paint.black.color, width: 0.022)
+        },
+        { p in
+            let f = p.face
+            let c = pt(0, f.browY - 0.5)
+            let petals = (0..<5).map { i -> Path in
+                let a = CGFloat(i) / 5 * 2 * .pi - .pi / 2
+                return circle(pt(c.x + cos(a) * 0.12, c.y + sin(a) * 0.12), 0.08)
+            }
+            p.fill(petals, Paint.pink.color, opacity: 0.95, soft: 0.004)
+            p.fill(circle(c, 0.07), Paint.yellow.color, opacity: 0.97, soft: 0.004)
+            var swirls: [Path] = []
+            for s in [-1.0, 1.0] as [CGFloat] {
+                var swirl = Path()
+                let sc = pt(s * f.faceHalfWidth * 0.68, 0.7)
+                for i in 0...40 {
+                    let a = s * CGFloat(i) / 40 * .pi * 3.5
+                    let r = CGFloat(i) / 40 * 0.16
+                    let q = pt(sc.x + cos(a) * r, sc.y + sin(a) * r)
+                    if i == 0 { swirl.move(to: q) } else { swirl.addLine(to: q) }
+                }
+                swirls.append(swirl)
+            }
+            p.stroke(swirls, Paint.turquoise.color, width: 0.03)
+            let dots = (0..<7).map { i -> Path in
+                let a = CGFloat.pi * (0.2 + 0.6 * CGFloat(i) / 6)
+                return circle(pt(cos(a) * 0.42, f.chin - 0.45 + sin(a) * 0.25), 0.03)
+            }
+            p.fill(dots, Paint.black.color, soft: 0.003)
         },
     ]
 }
