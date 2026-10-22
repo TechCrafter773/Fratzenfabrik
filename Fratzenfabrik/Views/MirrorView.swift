@@ -55,13 +55,14 @@ struct MirrorView: View {
 
     private var cameraLayer: some View {
         ZStack {
-            CameraPreview(session: camera.tracker.session, configurationID: camera.configurationID)
+            CameraPreview(session: camera.tracker.session, configurationID: camera.configurationID, bridge: camera.previewBridge)
                 .ignoresSafeArea()
 
             TimelineView(.animation) { timeline in
                 let t = timeline.date.timeIntervalSinceReferenceDate
                 Canvas { ctx, size in
-                    let map = aspectFillMapper(imageSize: camera.imageSize, viewSize: size)
+                    let map = camera.previewBridge.mapper(for: camera.orientation)
+                        ?? aspectFillMapper(imageSize: camera.imageSize, viewSize: size)
                     for landmarks in camera.faces {
                         guard let face = FaceGeometry.from(landmarks, map: map) else { continue }
                         FacePainter.draw(design, face: face, in: ctx, opacity: opacity,

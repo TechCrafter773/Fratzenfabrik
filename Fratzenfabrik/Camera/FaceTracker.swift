@@ -6,6 +6,7 @@ struct FrameResult {
     var faces: [FaceLandmarks]
     var imageSize: CGSize
     var snapshot: CGImage?
+    var orientation: CGImagePropertyOrientation
 }
 
 /// Kümmert sich um Kamera-Session und Gesichtserkennung – alles abseits des Main Threads.
@@ -23,6 +24,8 @@ final class FaceTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate,
     private let lock = NSLock()
     private var snapshotRequested = false
     private var isFront = false
+    /// Ausrichtung, die die Vorschau tatsächlich verwendet (von `PreviewBridge` ermittelt).
+    private var orientationOverride: CGImagePropertyOrientation?
 
     static var hasCamera: Bool {
         AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil
@@ -69,6 +72,7 @@ final class FaceTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate,
             }
             lock.lock()
             isFront = actualPosition == .front
+            orientationOverride = nil
             lock.unlock()
             session.commitConfiguration()
             onConfigured?(actualPosition, ok)
@@ -87,6 +91,12 @@ final class FaceTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate,
         }
     }
 
+    func setOrientation(_ orientation: CGImagePropertyOrientation) {
+        lock.lock()
+        orientationOverride = orientation
+        lock.unlock()
+    }
+
     func requestSnapshot() {
         lock.lock()
         snapshotRequested = true
@@ -102,15 +112,18 @@ final class FaceTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate,
 
         lock.lock()
         let front = isFront
+        let override = orientationOverride
         let wantsSnapshot = snapshotRequested
         snapshotRequested = false
         lock.unlock()
 
-        // Querformat-Puffer für das Hochkant-Display drehen; die Selfie-Kamera zusätzlich spiegeln,
-        // damit die Punkte genau zur (gespiegelten) Vorschau passen.
-        let landscape = width > height
-        let orientation: CGImagePropertyOrientation = landscape ? (front ? .leftMirrored : .right) : .up
-        let size = landscape ? CGSize(width: height, height: width) : CGSize(width: width, height: height)
+        // Der Sensor liefert Querformat. Vision bekommt genau die Drehung/Spiegelung, die auch die
+        // Vorschau anzeigt – so liegen erkannte Punkte, Overlay und Foto deckungsgleich.
+        let fallback: CGImagePropertyOrientation = width > height ? (front ? .leftMirrored : .right) : .up
+        let orientation = override ?? fallback
+        let size = orientation.swapsAxes
+            ? CGSize(width: height, height: width)
+            : CGSize(width: width, height: height)
 
         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation, options: [:])
         try? handler.perform([request])
@@ -124,7 +137,7 @@ final class FaceTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate,
             let image = CIImage(cvPixelBuffer: pixelBuffer).oriented(orientation)
             snapshot = ciContext.createCGImage(image, from: image.extent)
         }
-        onFrame?(FrameResult(faces: faces, imageSize: size, snapshot: snapshot))
+        onFrame?(FrameResult(faces: faces, imageSize: size, snapshot: snapshot, orientation: orientation))
     }
 }
 
@@ -153,5 +166,30 @@ extension FaceLandmarks {
             innerLips: pts(lm.innerLips),
             contour: pts(lm.faceContour)
         )
+    }
+}
+
+extension CGImagePropertyOrientation {
+    var swapsAxes: Bool {
+        switch self {
+        case .left, .right, .leftMirrored, .rightMirrored: true
+        default: false
+        }
+    }
+
+    /// Rechnet einen normierten Punkt im ausgerichteten Bild zurück ins rohe Sensorbild.
+    func rawPoint(fromOriented p: CGPoint) -> CGPoint {
+        let u = p.x, v = p.y
+        switch self {
+        case .up: return CGPoint(x: u, y: v)
+        case .upMirrored: return CGPoint(x: 1 - u, y: v)
+        case .down: return CGPoint(x: 1 - u, y: 1 - v)
+        case .downMirrored: return CGPoint(x: u, y: 1 - v)
+        case .right: return CGPoint(x: v, y: 1 - u)
+        case .leftMirrored: return CGPoint(x: v, y: u)
+        case .left: return CGPoint(x: 1 - v, y: u)
+        case .rightMirrored: return CGPoint(x: 1 - v, y: 1 - u)
+        @unknown default: return p
+        }
     }
 }

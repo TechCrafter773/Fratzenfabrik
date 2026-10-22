@@ -1,4 +1,5 @@
 import AVFoundation
+import ImageIO
 import SwiftUI
 
 @MainActor
@@ -11,6 +12,10 @@ final class CameraModel: ObservableObject {
     @Published private(set) var access: Access = .unknown
     /// Wird nach jeder Kamera-Umstellung erhöht, damit die Vorschau ihre Ausrichtung neu setzt.
     @Published private(set) var configurationID = 0
+    @Published private(set) var orientation: CGImagePropertyOrientation = .right
+
+    /// Verbindung zur Vorschau, um deren echte Drehung/Spiegelung zu übernehmen.
+    let previewBridge = PreviewBridge()
 
     let tracker = FaceTracker()
     private var missedFrames = 0
@@ -64,6 +69,10 @@ final class CameraModel: ObservableObject {
 
     private func handle(_ result: FrameResult) {
         imageSize = result.imageSize
+        orientation = result.orientation
+        if let shown = previewBridge.displayedOrientation(), shown != result.orientation {
+            tracker.setOrientation(shown)
+        }
 
         if let snapshot = result.snapshot, let completion = pendingSnapshot {
             pendingSnapshot = nil
