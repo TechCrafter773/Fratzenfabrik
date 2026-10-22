@@ -413,7 +413,7 @@ enum DesignCatalog {
 
     static let ghostCute = FaceDesign(
         id: .ghostCute,
-        name: "Süßes Gespensterchen",
+        name: "Gespenst: süß",
         emoji: "👻",
         tagline: "Kulleraugen, rosa Bäckchen und zwei Mini-Geister. Zum Knuddeln!",
         difficulty: .superEasy,
@@ -448,8 +448,8 @@ enum DesignCatalog {
 
     static let ghostFunny = FaceDesign(
         id: .ghostFunny,
-        name: "Glubsch-Gespenst",
-        emoji: "🤪",
+        name: "Gespenst: lustig",
+        emoji: "👻",
         tagline: "Schiefe Glubschaugen und Zunge raus – Buuuh, hihi!",
         difficulty: .superEasy,
         minutes: 10,
@@ -483,8 +483,8 @@ enum DesignCatalog {
 
     static let ghostScary = FaceDesign(
         id: .ghostScary,
-        name: "Schreckgespenst",
-        emoji: "😱",
+        name: "Gespenst: gruselig",
+        emoji: "👻",
         tagline: "Hohle Augen, schwarze Tränen, Schreimund. Nichts für schwache Nerven!",
         difficulty: .medium,
         minutes: 20,
