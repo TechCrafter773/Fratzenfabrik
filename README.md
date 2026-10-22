@@ -4,13 +4,14 @@ Halloween-Kinderschminke zum Nachmalen – und live auf dem Gesicht anprobieren.
 
 ## Was die App kann
 
-- **14 einfache Designs**: Gespenst, Katze, Zyklop, Kürbis, Hexe, Teufelchen, Mumie, Spinnennetz, Fledermaus, Vampir, Werwolf, Skelett, Zuckerschädel, Frankenstein
-- **Schritt-für-Schritt-Anleitungen** mit Farben, Werkzeug und Profi-Tipps. Die Vorschau auf dem Probe-Kind baut sich Schritt für Schritt auf.
-- **Spuk-Spiegel (Live-Kamera)**: Die Kamera (hinten oder vorne) erkennt Gesichter mit Apples Vision-Framework und legt die Schminke live darüber, bei bis zu 4 Kindern gleichzeitig.
-  - Mit dem Karussell wechselst du die Designs, mit dem Würfel kommt ein zufälliges.
-  - Im **Schritt-Modus** erscheint auf dem echten Gesicht nur das, was bis zum aktuellen Schritt gemalt ist. Der aktuelle Schritt pulsiert.
-  - Mit dem Regler stellst du die Deckkraft ein. Mit dem Auslöser machst du ein Foto inkl. Schminke und kannst es speichern oder teilen.
-- Ohne Kamera (z. B. im Simulator) springt das gezeichnete Probe-Kind ein.
+- **17 Designs**: drei Gespenster (süß, lustig, super gruselig), Katze, Zyklop, Kürbis, Hexe, Feuerteufel, Mumie, Spinnennetz, Fledermaus, Fledermaus-Schwarm, Vampir, Werwolf, Skelett, Zuckerschädel und Frankenstein.
+- **Mädchen und Jungs**: Auf der Startseite lässt sich nach Mädchen oder Jungs filtern. Jedes Design hat einen Frisur-Vorschlag für Mädchen und einen für Jungs.
+- **3D-Kinder**: Die Vorschau zeigt modellierte 3D-Köpfe (SceneKit) mit Frisur und Accessoires (Hexenhut, Katzenohren, Hörner, Schleife, Blumenkranz). Sie lassen sich per Wischen oder Knopf drehen und von der Seite ansehen. Die Schminke wird als Textur aufgemalt und baut sich Schritt für Schritt auf.
+- **Spuk-Spiegel live**:
+  - **Selfie-Kamera mit Face ID**: echtes 3D über ARKit. Das Gesichtsnetz wird bemalt, und die Schminke bewegt sich beim Drehen des Kopfes mit.
+  - **Rückkamera**: 2D-Overlay über die Vision-Gesichtserkennung, auch bei mehreren Kindern gleichzeitig.
+- **Spuk-Sounds und Mund-auf-Effekt**: Reißt das Kind den Mund auf, fliegen Geister, Fledermäuse, Flammen oder anderes heraus, und die Fratze ruft etwas („Buuuh!“, „Miau!“, „Auuuuh!“). Beim Fratzen-Wechsel gibt es ein Rauschen, beim Foto ein Türknarzen. Über den Lautsprecher-Knopf lässt sich der Ton ausschalten.
+- Mit dem Auslöser entsteht ein Foto inklusive Schminke, das man speichern oder teilen kann.
 
 ## Bauen
 
@@ -27,8 +28,11 @@ Alles läuft lokal auf dem Gerät. Es gibt keinen Server, kein Tracking und kein
 | `App/` | App-Einstieg |
 | `Theme/` | Farben, Schleim-Tropfen, Spuk-Hintergrund, Logo |
 | `Models/` | Designs & Anleitungen (`DesignCatalog.swift`) |
-| `Painting/` | Gesichtsgeometrie, Pinsel-Helfer, die Designs als Ebenen (`FacePainter.swift`), Probe-Kind |
-| `Camera/` | AVFoundation-Session + Vision-Gesichtserkennung |
+| `Painting/` | Gesichtsgeometrie, Pinsel-Helfer, Designs als Ebenen (`FacePainter.swift`), Textur-Rendering |
+| `ThreeD/` | 3D-Kopf, Frisuren & Accessoires, drehbare Ansicht, Vorschaubilder |
+| `Effects/` | Spuk-Sounds, Mund-auf-Partikel |
+| `Sounds/` | Effekt-Sounds (WAV) |
+| `Camera/` | ARKit-3D (Selfie), AVFoundation + Vision (Rückkamera) |
 | `Views/` | Startseite, Detailseite, Spuk-Spiegel, Foto-Ergebnis |
 
 **Neues Design hinzufügen:** Füge in `DesignID` einen Fall hinzu, lege in `DesignCatalog` den Eintrag mit den Schritten an und in `FacePainter` die passende Anzahl Ebenen. Gezeichnet wird im „Gesichtsraum“: Die Augen liegen bei (±0,5 | 0), der Mund bei etwa (0 | 1,05), das Kinn bei etwa (0 | 1,8).
