@@ -11,17 +11,6 @@ struct CameraPreview: UIViewRepresentable {
     final class PreviewView: UIView {
         override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
         var previewLayer: AVCaptureVideoPreviewLayer { layer as! AVCaptureVideoPreviewLayer }
-
-        func applyPortrait() {
-            if let connection = previewLayer.connection, connection.isVideoRotationAngleSupported(90) {
-                connection.videoRotationAngle = 90
-            }
-        }
-
-        override func layoutSubviews() {
-            super.layoutSubviews()
-            applyPortrait()
-        }
     }
 
     func makeUIView(context: Context) -> PreviewView {
@@ -34,7 +23,7 @@ struct CameraPreview: UIViewRepresentable {
     }
 
     func updateUIView(_ view: PreviewView, context: Context) {
-        view.applyPortrait()
+        bridge.enforceRotation()
     }
 }
 
@@ -43,6 +32,28 @@ struct CameraPreview: UIViewRepresentable {
 @MainActor
 final class PreviewBridge {
     weak var layer: AVCaptureVideoPreviewLayer?
+    private var coordinator: AVCaptureDevice.RotationCoordinator?
+    private var coordinatedDevice: AVCaptureDevice?
+
+    /// Nach jedem Kamerawechsel: Apple berechnet den richtigen Drehwinkel für genau diese Kamera.
+    func attach(device: AVCaptureDevice?) {
+        guard let device, let layer, device !== coordinatedDevice || coordinator == nil else {
+            enforceRotation()
+            return
+        }
+        coordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: layer)
+        coordinatedDevice = device
+        enforceRotation()
+    }
+
+    /// Hält die Vorschau aufrecht – auch wenn iOS die Verbindung beim Kamerawechsel neu aufbaut.
+    func enforceRotation() {
+        guard let connection = layer?.connection else { return }
+        let angle = coordinator?.videoRotationAngleForHorizonLevelPreview ?? 90
+        if connection.videoRotationAngle != angle, connection.isVideoRotationAngleSupported(angle) {
+            connection.videoRotationAngle = angle
+        }
+    }
 
     private var readyLayer: AVCaptureVideoPreviewLayer? {
         guard let layer, layer.bounds.width > 0, layer.connection != nil else { return nil }

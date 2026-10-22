@@ -25,10 +25,11 @@ final class CameraModel: ObservableObject {
         tracker.onFrame = { [weak self] result in
             Task { @MainActor in self?.handle(result) }
         }
-        tracker.onConfigured = { [weak self] position, ok in
+        tracker.onConfigured = { [weak self] device, ok in
             Task { @MainActor in
                 guard let self else { return }
-                self.position = position
+                if let device { self.position = device.position }
+                self.previewBridge.attach(device: device)
                 self.configurationID += 1
                 if !ok { self.access = .noCamera }
             }
@@ -70,6 +71,7 @@ final class CameraModel: ObservableObject {
     private func handle(_ result: FrameResult) {
         imageSize = result.imageSize
         orientation = result.orientation
+        previewBridge.enforceRotation()
         if let shown = previewBridge.displayedOrientation(), shown != result.orientation {
             tracker.setOrientation(shown)
         }

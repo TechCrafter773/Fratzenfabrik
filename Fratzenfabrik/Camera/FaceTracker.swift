@@ -13,7 +13,7 @@ struct FrameResult {
 final class FaceTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, @unchecked Sendable {
     let session = AVCaptureSession()
     var onFrame: ((FrameResult) -> Void)?
-    var onConfigured: ((AVCaptureDevice.Position, Bool) -> Void)?
+    var onConfigured: ((AVCaptureDevice?, Bool) -> Void)?
 
     private let sessionQueue = DispatchQueue(label: "fratzenfabrik.session")
     private let videoQueue = DispatchQueue(label: "fratzenfabrik.video", qos: .userInteractive)
@@ -75,7 +75,7 @@ final class FaceTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate,
             orientationOverride = nil
             lock.unlock()
             session.commitConfiguration()
-            onConfigured?(actualPosition, ok)
+            onConfigured?(input?.device, ok)
         }
     }
 
