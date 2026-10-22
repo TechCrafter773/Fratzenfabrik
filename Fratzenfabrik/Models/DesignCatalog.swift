@@ -46,7 +46,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .spiky, color: HairColor.orange, streak: HairColor.green,
                                 title: "Kürbis-Stacheln",
                                 tip: "Mit Gel kurze Spitzen hochzwirbeln und die Spitzen orange ansprayen."),
-        sound: SpookSound(phrase: "Süßes oder Saures!", pitch: 1.2, rate: 0.5),
         mouthEmojis: ["🍬", "🍭", "🎃"]
     )
 
@@ -82,7 +81,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .wild, color: HairColor.darkBrown, streak: HairColor.green, accessory: .witchHat,
                                 title: "Zauberer-Strubbel",
                                 tip: "Haare wild verwuscheln, ein paar grüne Spray-Strähnen und der spitze Hut."),
-        sound: SpookSound(phrase: "Hihihihi! Hex hex!", pitch: 1.8, rate: 0.6),
         mouthEmojis: ["✨", "⭐️", "🧪"]
     )
 
@@ -118,7 +116,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .slicked, color: HairColor.black, streak: HairColor.silver,
                                 title: "Glatt nach hinten",
                                 tip: "Mit Gel nach hinten kämmen, ein paar silberne Spray-Fäden darüber."),
-        sound: SpookSound(phrase: "Krabbel krabbel krabbel!", pitch: 1.5, rate: 0.6),
         mouthEmojis: ["🕷️", "🕸️"]
     )
 
@@ -151,7 +148,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .spiky, color: HairColor.black, streak: HairColor.purple,
                                 title: "Spitze Ohren-Frisur",
                                 tip: "Zwei Strähnen links und rechts mit Gel zu spitzen Fledermausohren drehen."),
-        sound: SpookSound(phrase: "Fiiiep fiiiep!", pitch: 2.0, rate: 0.55),
         mouthEmojis: ["🦇"]
     )
 
@@ -190,7 +186,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .slicked, color: HairColor.black,
                                 title: "Dracula-Gel",
                                 tip: "Mit viel Gel glatt nach hinten kämmen – vorne ein spitzer Haaransatz."),
-        sound: SpookSound(phrase: "Bluuut! Äh, ich meine Ketchup!", pitch: 0.8, rate: 0.42),
         mouthEmojis: ["🦇", "🩸"]
     )
 
@@ -229,7 +224,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .slicked, color: HairColor.black, streak: HairColor.white,
                                 title: "Totenkopf-Glatt",
                                 tip: "Glatt nach hinten gegelt, damit der Schädel schön rund aussieht."),
-        sound: SpookSound(phrase: "Klapper klapper klapper!", pitch: 1.2, rate: 0.6),
         mouthEmojis: ["🦴", "💀"]
     )
 
@@ -268,7 +262,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .flatTop, color: HairColor.black,
                                 title: "Eckiger Flat-Top",
                                 tip: "Haare mit Gel steil hochstellen und oben platt drücken – wie ein Kasten."),
-        sound: SpookSound(phrase: "Uuuaaargh!", pitch: 0.55, rate: 0.35),
         mouthEmojis: ["⚡️", "🔩"]
     )
 
@@ -304,7 +297,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .spiky, color: HairColor.green,
                                 title: "Grüne Monster-Stacheln",
                                 tip: "Mit Gel Stacheln formen und grün ansprayen."),
-        sound: SpookSound(phrase: "Ich seeeh dich!", pitch: 0.7, rate: 0.4),
         mouthEmojis: ["👁️", "👀"]
     )
 
@@ -341,7 +333,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .bandaged, color: HairColor.beige,
                                 title: "Mumien-Turban",
                                 tip: "Mullbinde oder zerrissenes weißes Tuch um den Kopf wickeln, Enden hängen lassen."),
-        sound: SpookSound(phrase: "Mmmmmh. Mmmmmmh!", pitch: 0.6, rate: 0.25),
         mouthEmojis: ["💨", "🪲"]
     )
 
@@ -377,7 +368,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .wild, color: HairColor.brown, streak: HairColor.grey,
                                 title: "Zottelfell",
                                 tip: "Mit Haarwachs in alle Richtungen zwirbeln und graue Strähnen einsprayen."),
-        sound: SpookSound(phrase: "Auuuuuuuuuh!", pitch: 0.8, rate: 0.3),
         mouthEmojis: ["🌕", "🐾"]
     )
 
@@ -416,7 +406,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .slicked, color: HairColor.black, accessory: .flowers,
                                 title: "Gegelt mit Blume",
                                 tip: "Glatt zurückgekämmt und eine große Blume hinters Ohr."),
-        sound: SpookSound(phrase: "Hola! Buh!", pitch: 1.3, rate: 0.5),
         mouthEmojis: ["🌸", "🌼", "💐"]
     )
 
@@ -454,7 +443,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .short, color: HairColor.white,
                                 title: "Weiß gepudert",
                                 tip: "Kurze Haare mit weißem Spray oder etwas Babypuder bestäuben."),
-        sound: SpookSound(phrase: "Buh! Hihi!", pitch: 1.9, rate: 0.45),
         mouthEmojis: ["👻", "💖"]
     )
 
@@ -490,7 +478,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .spiky, color: HairColor.white,
                                 title: "Elektrisiert",
                                 tip: "Mit Gel in alle Richtungen hochstellen – als hätte der Geist in die Steckdose gefasst."),
-        sound: SpookSound(phrase: "Buuuuh! Hihihi!", pitch: 1.4, rate: 0.5),
         mouthEmojis: ["👻", "😜"]
     )
 
@@ -529,7 +516,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .wild, color: HairColor.grey,
                                 title: "Zerzaust aus der Gruft",
                                 tip: "Grau einsprayen und völlig zerzausen – wie nach 100 Jahren im Grab."),
-        sound: SpookSound(phrase: "Buuuuuuuuuuuh!", pitch: 0.5, rate: 0.2),
         mouthEmojis: ["👻", "💀"]
     )
 
@@ -570,7 +556,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .short, color: HairColor.darkBrown, accessory: .catEars,
                                 title: "Kater mit Öhrchen",
                                 tip: "Kurze Haare verwuscheln und einen Ohren-Haarreif aufsetzen."),
-        sound: SpookSound(phrase: "Miauuuuu! Schnurrr!", pitch: 1.9, rate: 0.35),
         mouthEmojis: ["🐾", "🐟", "💕"]
     )
 
@@ -609,7 +594,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .spiky, color: HairColor.black, streak: HairColor.red, accessory: .horns,
                                 title: "Feuer-Spitzen",
                                 tip: "Gel-Spitzen nach oben, die Spitzen rot-orange ansprayen wie Flammen."),
-        sound: SpookSound(phrase: "Muahahahaha!", pitch: 0.6, rate: 0.45),
         mouthEmojis: ["🔥"]
     )
 
@@ -642,7 +626,6 @@ enum DesignCatalog {
         hairBoy: HairSuggestion(style: .short, color: HairColor.black, streak: HairColor.purple,
                                 title: "Mitternachts-Look",
                                 tip: "Kurz und verwuschelt mit ein paar lila Spray-Spitzen."),
-        sound: SpookSound(phrase: "Fiiep! Fiiep! Fiiep!", pitch: 2.0, rate: 0.6),
         mouthEmojis: ["🦇", "🌙"]
     )
 }

@@ -10,7 +10,7 @@ Halloween-Kinderschminke zum Nachmalen – und live auf dem Gesicht anprobieren.
 - **Spuk-Spiegel live**:
   - **Selfie-Kamera mit Face ID**: echtes 3D über ARKit. Das Gesichtsnetz wird bemalt, und die Schminke bewegt sich beim Drehen des Kopfes mit.
   - **Rückkamera**: 2D-Overlay über die Vision-Gesichtserkennung, auch bei mehreren Kindern gleichzeitig.
-- **Spuk-Sounds und Mund-auf-Effekt**: Reißt das Kind den Mund auf, fliegen Geister, Fledermäuse, Flammen oder anderes heraus, und die Fratze ruft etwas („Buuuh!“, „Miau!“, „Auuuuh!“). Beim Fratzen-Wechsel gibt es ein Rauschen, beim Foto ein Türknarzen. Über den Lautsprecher-Knopf lässt sich der Ton ausschalten.
+- **Mund-auf-Effekt und Spuk-Sounds**: Reißt das Kind den Mund auf, fliegen Geister, Fledermäuse, Flammen oder anderes heraus. Beim Fratzen-Wechsel gibt es ein Rauschen, beim Foto ein Türknarzen. Über den Lautsprecher-Knopf lässt sich der Ton ausschalten.
 - Mit dem Auslöser entsteht ein Foto inklusive Schminke, das man speichern oder teilen kann.
 
 ## Bauen

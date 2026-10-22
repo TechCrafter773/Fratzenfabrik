@@ -77,9 +77,6 @@ struct MirrorView: View {
         }
         .onChange(of: stepMode) { _, _ in updateARPaint() }
         .onChange(of: opacity) { _, _ in updateARPaint() }
-        .onChange(of: mouthOpen) { _, open in
-            if open { SpookAudio.shared.say(current.sound) }
-        }
         .sheet(item: $photo) { photo in
             PhotoResultView(photo: photo)
         }

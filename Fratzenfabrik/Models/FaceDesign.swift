@@ -88,13 +88,6 @@ struct HairSuggestion {
     var tip: String
 }
 
-/// Was die Fratze sagt, wenn das Kind den Mund aufreißt.
-struct SpookSound {
-    var phrase: String
-    var pitch: Float = 1
-    var rate: Float = 0.45
-}
-
 struct FaceDesign: Identifiable, Hashable {
     let id: DesignID
     let name: String
@@ -110,7 +103,6 @@ struct FaceDesign: Identifiable, Hashable {
     var kids: Set<Kid> = [.girl, .boy]
     var hairGirl: HairSuggestion
     var hairBoy: HairSuggestion
-    var sound: SpookSound
     /// Was beim Mund-Aufreißen herausfliegt.
     var mouthEmojis: [String]
 

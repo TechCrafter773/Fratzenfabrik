@@ -1,15 +1,13 @@
 import AVFoundation
 import SwiftUI
 
-/// Spuk-Sounds: kurze Effekte und gesprochene Fratzen-Rufe („Buuuh!“, „Miau!“, „Auuuuh!“).
+/// Spuk-Sounds: kurze Effekte beim Fratzen-Wechsel, bei geschafften Schritten und beim Foto.
 @MainActor
 final class SpookAudio {
     static let shared = SpookAudio()
     static let enabledKey = "spookSoundsOn"
 
-    private let synthesizer = AVSpeechSynthesizer()
     private var players: [String: AVAudioPlayer] = [:]
-    private var lastPhrase = Date.distantPast
 
     private var enabled: Bool { UserDefaults.standard.object(forKey: Self.enabledKey) as? Bool ?? true }
 
@@ -34,20 +32,6 @@ final class SpookAudio {
         player.volume = volume
         player.currentTime = 0
         player.play()
-    }
-
-    /// Spricht den Ruf der Fratze. Mit kurzer Pause, damit es nicht durcheinanderplappert.
-    func say(_ sound: SpookSound, force: Bool = false) {
-        guard enabled else { return }
-        guard force || Date().timeIntervalSince(lastPhrase) > 2.2 else { return }
-        lastPhrase = Date()
-        if synthesizer.isSpeaking { synthesizer.stopSpeaking(at: .immediate) }
-        let utterance = AVSpeechUtterance(string: sound.phrase)
-        utterance.voice = AVSpeechSynthesisVoice(language: "de-DE")
-        utterance.pitchMultiplier = min(max(sound.pitch, 0.5), 2.0)
-        utterance.rate = min(max(sound.rate, AVSpeechUtteranceMinimumSpeechRate), AVSpeechUtteranceMaximumSpeechRate)
-        utterance.volume = 1
-        synthesizer.speak(utterance)
     }
 }
 
