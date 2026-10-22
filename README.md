@@ -32,3 +32,21 @@ Alles läuft lokal auf dem Gerät. Es gibt keinen Server, kein Tracking und kein
 | `Views/` | Startseite, Detailseite, Spuk-Spiegel, Foto-Ergebnis |
 
 **Neues Design hinzufügen:** Füge in `DesignID` einen Fall hinzu, lege in `DesignCatalog` den Eintrag mit den Schritten an und in `FacePainter` die passende Anzahl Ebenen. Gezeichnet wird im „Gesichtsraum“: Die Augen liegen bei (±0,5 | 0), der Mund bei etwa (0 | 1,05), das Kinn bei etwa (0 | 1,8).
+
+## TestFlight über GitHub Actions
+
+Die App wird komplett in der Cloud gebaut, auf macOS-Runnern von GitHub:
+
+- **Build** (`.github/workflows/build.yml`): kompiliert bei jedem Push für den Simulator.
+- **TestFlight** (`.github/workflows/testflight.yml`): archiviert die App, signiert sie per Apple-Cloud-Signatur (kein Zertifikat nötig) und lädt sie zu TestFlight hoch. Starten über *Actions → TestFlight → Run workflow*. Bei Push auf `main` läuft er automatisch. Die Build-Nummer ist die Laufnummer des Workflows.
+
+Benötigte Repository-Secrets (*Settings → Secrets and variables → Actions*):
+
+| Secret | Inhalt |
+|---|---|
+| `APPLE_TEAM_ID` | 10-stellige Team-ID (developer.apple.com → Membership) |
+| `APP_STORE_CONNECT_KEY_ID` | Key-ID des API-Schlüssels |
+| `APP_STORE_CONNECT_ISSUER_ID` | Issuer-ID (steht über der Schlüsselliste) |
+| `APP_STORE_CONNECT_KEY_P8` | Inhalt der `.p8`-Datei (roh oder base64) |
+
+Der API-Schlüssel braucht die Rolle **Admin**, damit Apple das Verteilungszertifikat in der Cloud verwalten darf.
