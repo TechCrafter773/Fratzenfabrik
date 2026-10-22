@@ -1,4 +1,5 @@
 import Photos
+import SceneKit
 import SwiftUI
 
 struct CapturedPhoto: Identifiable {
@@ -28,19 +29,32 @@ enum PhotoComposer {
         return render(content)
     }
 
-    static func composeCartoon(design: DesignID, visibleSteps: Int?, opacity: Double) -> UIImage? {
-        let size = CGSize(width: 1080, height: 1350)
+    /// AR-Schnappschuss (Kamera + 3D-Schminke) mit Fratzenfabrik-Stempel.
+    static func watermarked(_ image: UIImage) -> UIImage? {
+        let size = image.size
         let content = ZStack(alignment: .bottomTrailing) {
-            LinearGradient(colors: [Spook.plum, Spook.night], startPoint: .top, endPoint: .bottom)
-            Canvas { ctx, canvasSize in
-                let face = FaceGeometry.cartoon(in: CGRect(origin: .zero, size: canvasSize).insetBy(dx: 60, dy: 60))
-                CartoonKid.draw(face, in: ctx, time: 1, blink: false)
-                FacePainter.draw(design, face: face, in: ctx, opacity: opacity, visibleSteps: visibleSteps)
-            }
+            Image(uiImage: image)
+                .resizable()
+                .frame(width: size.width, height: size.height)
             Watermark(width: size.width)
         }
         .frame(width: size.width, height: size.height)
-        return render(content)
+        let renderer = ImageRenderer(content: content)
+        renderer.scale = image.scale
+        return renderer.uiImage
+    }
+
+    /// Ohne Kamera: das 3D-Probekind als Foto.
+    static func composeDemo(design: DesignID, kid: Kid, visibleSteps: Int?) -> UIImage? {
+        let stage = KidStage()
+        stage.configure(kid: kid, hair: DesignCatalog.design(design).hair(for: kid), design: design, visibleSteps: visibleSteps)
+        stage.setYaw(-0.3, animated: false)
+        stage.scene.background.contents = UIColor(hex: 0x2B0B45)
+        let renderer = SCNRenderer(device: MTLCreateSystemDefaultDevice(), options: nil)
+        renderer.scene = stage.scene
+        renderer.pointOfView = stage.cameraNode
+        let shot = renderer.snapshot(atTime: 0, with: CGSize(width: 1080, height: 1350), antialiasingMode: .multisampling4X)
+        return watermarked(shot)
     }
 
     private static func render(_ view: some View) -> UIImage? {

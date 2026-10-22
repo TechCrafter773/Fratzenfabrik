@@ -1,8 +1,20 @@
 import SwiftUI
+import UIKit
 
 enum DesignID: String, CaseIterable, Identifiable {
-    case ghost, cat, cyclops, pumpkin, witch, devil, mummy, spiderweb, bat, vampire, werewolf, skeleton, sugarSkull, frankenstein
+    case ghostCute, ghostFunny, ghostScary
+    case cat, cyclops, pumpkin, witch, devil, mummy, spiderweb, bat, batSwarm
+    case vampire, werewolf, skeleton, sugarSkull, frankenstein
     var id: String { rawValue }
+}
+
+/// Für wen ein Design gedacht ist – und welches 3D-Modell es zeigt.
+enum Kid: String, CaseIterable, Identifiable {
+    case girl, boy
+    var id: String { rawValue }
+    var label: String { self == .girl ? "Mädchen" : "Junge" }
+    var plural: String { self == .girl ? "Mädchen" : "Jungs" }
+    var emoji: String { self == .girl ? "👧" : "👦" }
 }
 
 struct PaintColor: Identifiable, Hashable {
@@ -26,6 +38,7 @@ enum Paint {
     static let yellow = PaintColor(name: "Gelb", color: Color(hex: 0xFFD93B))
     static let brown = PaintColor(name: "Braun", color: Color(hex: 0x6B4226))
     static let turquoise = PaintColor(name: "Türkis", color: Color(hex: 0x2EC4C6))
+    static let lightBlue = PaintColor(name: "Hellblau", color: Color(hex: 0x9FD8FF))
     static let beige = PaintColor(name: "Beige", color: Color(hex: 0xE8D9B5))
     static let darkRed = PaintColor(name: "Dunkelrot", color: Color(hex: 0x8E0F24))
     static let darkBrown = PaintColor(name: "Dunkelbraun", color: Color(hex: 0x3B2414))
@@ -55,6 +68,33 @@ struct PaintStep: Identifiable {
     let tool: String
 }
 
+// MARK: - Frisuren
+
+enum HairStyle {
+    case short, spiky, slicked, wild, pigtails, long, buns, ponytail, flatTop, bandaged, braids
+}
+
+enum Accessory {
+    case catEars, witchHat, horns, bow, flowers
+}
+
+/// Ein Frisur-Vorschlag passend zum Design. Das 3D-Modell trägt ihn.
+struct HairSuggestion {
+    var style: HairStyle
+    var color: UIColor
+    var streak: UIColor? = nil
+    var accessory: Accessory? = nil
+    var title: String
+    var tip: String
+}
+
+/// Was die Fratze sagt, wenn das Kind den Mund aufreißt.
+struct SpookSound {
+    var phrase: String
+    var pitch: Float = 1
+    var rate: Float = 0.45
+}
+
 struct FaceDesign: Identifiable, Hashable {
     let id: DesignID
     let name: String
@@ -67,6 +107,21 @@ struct FaceDesign: Identifiable, Hashable {
     let tools: [String]
     let tip: String
     let steps: [PaintStep]
+    var kids: Set<Kid> = [.girl, .boy]
+    var hairGirl: HairSuggestion
+    var hairBoy: HairSuggestion
+    var sound: SpookSound
+    /// Was beim Mund-Aufreißen herausfliegt.
+    var mouthEmojis: [String]
+
+    func hair(for kid: Kid) -> HairSuggestion { kid == .girl ? hairGirl : hairBoy }
+
+    /// Welches Modell auf Karten gezeigt wird, wenn kein Filter aktiv ist.
+    var preferredKid: Kid {
+        if kids == [.girl] { return .girl }
+        if kids == [.boy] { return .boy }
+        return id.rawValue.count.isMultiple(of: 2) ? .girl : .boy
+    }
 
     static func == (lhs: FaceDesign, rhs: FaceDesign) -> Bool { lhs.id == rhs.id }
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
@@ -77,4 +132,32 @@ extension Array where Element == PaintStep {
     static func steps(_ list: [(String, String, String)]) -> [PaintStep] {
         list.enumerated().map { PaintStep(id: $0.offset, title: $0.element.0, text: $0.element.1, tool: $0.element.2) }
     }
+}
+
+extension UIColor {
+    convenience init(hex: UInt32) {
+        self.init(
+            red: CGFloat((hex >> 16) & 0xFF) / 255,
+            green: CGFloat((hex >> 8) & 0xFF) / 255,
+            blue: CGFloat(hex & 0xFF) / 255,
+            alpha: 1
+        )
+    }
+}
+
+enum HairColor {
+    static let black = UIColor(hex: 0x1C1714)
+    static let darkBrown = UIColor(hex: 0x3B2416)
+    static let brown = UIColor(hex: 0x6B4224)
+    static let blond = UIColor(hex: 0xC9A15E)
+    static let ginger = UIColor(hex: 0xB5531F)
+    static let white = UIColor(hex: 0xE9E6EF)
+    static let grey = UIColor(hex: 0x8E8A96)
+    static let green = UIColor(hex: 0x4FA83A)
+    static let red = UIColor(hex: 0xA5162C)
+    static let purple = UIColor(hex: 0x6A35B0)
+    static let orange = UIColor(hex: 0xE2741E)
+    static let pink = UIColor(hex: 0xFF7FB6)
+    static let silver = UIColor(hex: 0xCFD3DA)
+    static let beige = UIColor(hex: 0xE3D5B1)
 }

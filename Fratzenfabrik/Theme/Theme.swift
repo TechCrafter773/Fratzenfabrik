@@ -12,6 +12,7 @@ enum Spook {
     static let ghost = Color(hex: 0xF4F0FF)
     static let candy = Color(hex: 0xFF5FD2)
     static let moon = Color(hex: 0xFFE66D)
+    static let lightBlueAccent = Color(hex: 0x9FD8FF)
 
     static func title(_ size: CGFloat) -> Font { .system(size: size, weight: .black, design: .rounded) }
     static func body(_ size: CGFloat = 16, weight: Font.Weight = .semibold) -> Font {

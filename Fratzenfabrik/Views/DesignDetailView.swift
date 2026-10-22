@@ -5,6 +5,15 @@ struct DesignDetailView: View {
     /// `nil` zeigt das fertige Design, sonst bis einschließlich diesem Schritt.
     @State private var selectedStep: Int?
     @State private var mirror: MirrorLaunch?
+    @State private var kid: Kid
+    @State private var turn: TurnRequest?
+
+    init(design: FaceDesign, initialKid: Kid) {
+        self.design = design
+        _kid = State(initialValue: initialKid)
+    }
+
+    private var hair: HairSuggestion { design.hair(for: kid) }
 
     var body: some View {
         ZStack {
@@ -14,6 +23,7 @@ struct DesignDetailView: View {
                 VStack(alignment: .leading, spacing: 22) {
                     header
                     preview
+                    hairCard
                     infoChips
                     materials
                     stepsList
@@ -28,7 +38,7 @@ struct DesignDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
         .fullScreenCover(item: $mirror) { launch in
-            MirrorView(design: launch.design, stepMode: launch.stepMode, step: selectedStep ?? 0)
+            MirrorView(design: launch.design, stepMode: launch.stepMode, step: selectedStep ?? 0, kid: kid)
         }
     }
 
@@ -51,14 +61,36 @@ struct DesignDetailView: View {
 
     private var preview: some View {
         VStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(RadialGradient(colors: [design.accent.opacity(0.35), .clear], center: .center, startRadius: 10, endRadius: 170))
-                DesignPreview(design: design.id, visibleSteps: selectedStep.map { $0 + 1 }, pulseLast: selectedStep != nil)
-                    .padding(8)
+            HStack(spacing: 10) {
+                ForEach(Kid.allCases) { option in
+                    KidChip(title: "\(option.emoji) \(option.label)",
+                            color: option == .girl ? Spook.candy : Spook.lightBlueAccent,
+                            selected: kid == option) { kid = option }
+                }
             }
-            .frame(height: 320)
+
+            ZStack(alignment: .bottom) {
+                Circle()
+                    .fill(RadialGradient(colors: [design.accent.opacity(0.35), .clear], center: .center, startRadius: 10, endRadius: 200))
+                Head3DView(design: design.id, kid: kid, hair: hair,
+                           visibleSteps: selectedStep.map { $0 + 1 }, turn: turn)
+                HStack(spacing: 10) {
+                    turnButton("↶ Seite", yaw: 1.25)
+                    turnButton("Vorne", yaw: 0)
+                    turnButton("Seite ↷", yaw: -1.25)
+                }
+                .padding(.bottom, 6)
+            }
+            .frame(height: 420)
             .frame(maxWidth: .infinity)
+            .overlay(alignment: .topTrailing) {
+                Text("👆 wischen zum Drehen")
+                    .font(Spook.body(11, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.7))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Capsule().fill(.black.opacity(0.35)))
+            }
 
             Text(selectedStep.map { "Schritt \($0 + 1): \(design.steps[$0].title)" } ?? "So sieht’s fertig aus ✨")
                 .font(Spook.title(17))
@@ -73,6 +105,45 @@ struct DesignDetailView: View {
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.7), value: selectedStep)
+    }
+
+    private func turnButton(_ title: String, yaw: Float) -> some View {
+        Button {
+            turn = TurnRequest(yaw: yaw)
+        } label: {
+            Text(title)
+                .font(Spook.body(13, weight: .heavy))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background(Capsule().fill(.black.opacity(0.5)))
+                .overlay(Capsule().stroke(.white.opacity(0.25), lineWidth: 1))
+        }
+        .buttonStyle(PressableStyle())
+    }
+
+    private var hairCard: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text("💇").font(.system(size: 30)).wobble(8, speed: 2.5)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Frisur-Idee für \(kid == .girl ? "Mädchen" : "Jungs"): \(hair.title)")
+                    .font(Spook.title(17))
+                    .foregroundStyle(kid == .girl ? Spook.candy : Spook.lightBlueAccent)
+                Text(hair.tip)
+                    .font(Spook.body(14, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .fixedSize(horizontal: false, vertical: true)
+                Text("Das andere Modell oben zeigt die Frisur für \(kid == .girl ? "Jungs" : "Mädchen").")
+                    .font(Spook.body(12, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Color.white.opacity(0.08)))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous)
+            .stroke((kid == .girl ? Spook.candy : Spook.lightBlueAccent).opacity(0.5), lineWidth: 1.5))
+        .animation(.easeInOut, value: kid)
     }
 
     private func stepDot(label: String, selected: Bool, action: @escaping () -> Void) -> some View {

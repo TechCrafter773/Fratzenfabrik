@@ -2,63 +2,14 @@ import SwiftUI
 
 /// Alle Schmink-Ideen. Die Anzahl der Schritte muss zu den Ebenen in `FacePainter` passen.
 enum DesignCatalog {
-    static let all: [FaceDesign] = [ghost, cat, cyclops, pumpkin, witch, devil, mummy, spiderweb, bat, vampire, werewolf, skeleton, sugarSkull, frankenstein]
+    static let all: [FaceDesign] = [
+        ghostCute, ghostFunny, ghostScary, cat, cyclops, pumpkin, witch, devil, mummy,
+        spiderweb, bat, batSwarm, vampire, werewolf, skeleton, sugarSkull, frankenstein,
+    ]
 
     static func design(_ id: DesignID) -> FaceDesign { all.first { $0.id == id }! }
 
-    static let ghost = FaceDesign(
-        id: .ghost,
-        name: "Kleines Gespenst",
-        emoji: "👻",
-        tagline: "Buuuh! Der Klassiker – schneller geht Gruseln nicht.",
-        difficulty: .superEasy,
-        minutes: 10,
-        accent: Spook.ghost,
-        colors: [Paint.white, Paint.black, Paint.grey],
-        tools: ["Schminkschwamm", "Dicker Pinsel", "Wattestäbchen"],
-        tip: "Die weiße Farbe lieber in zwei dünnen Schichten auftragen statt einer dicken – dann bröckelt nichts.",
-        steps: .steps([
-            ("Weiß grundieren",
-             "Schwamm leicht anfeuchten, in die weiße Farbe tupfen und das ganze Gesicht betupfen. Augen und Haaransatz aussparen.",
-             "Schwamm"),
-            ("Riesige Augenhöhlen",
-             "Mit dem dicken Pinsel große, nach unten hängende schwarze Ovale um die Augen malen – wie traurige Gespensteraugen. Die Lider nur ganz vorsichtig.",
-             "Dicker Pinsel"),
-            ("Buuuh-Mund",
-             "Ein schwarzes, langgezogenes O über den Mund malen. Das Kind darf dabei ‚Buuuh‘ sagen!",
-             "Dicker Pinsel"),
-            ("Geisterschatten",
-             "Etwas Grau unter die Wangenknochen tupfen und verwischen. Schon schwebt das Gespenst!",
-             "Wattestäbchen"),
-        ])
-    )
 
-    static let cat = FaceDesign(
-        id: .cat,
-        name: "Schwarze Katze",
-        emoji: "🐱",
-        tagline: "Miau in 5 Minuten. Perfekt für Zappelkinder.",
-        difficulty: .superEasy,
-        minutes: 5,
-        accent: Spook.candy,
-        colors: [Paint.white, Paint.black, Paint.pink],
-        tools: ["Feiner Pinsel", "Schwamm (optional)"],
-        tip: "Schnurrhaare mit Schwung von innen nach außen malen und am Ende den Pinsel anheben – so werden sie spitz.",
-        steps: .steps([
-            ("Weiße Schnäuzchen-Bäckchen",
-             "Zwei weiße Kreise links und rechts über die Oberlippe tupfen. Das ist die Katzenschnauze.",
-             "Schwamm"),
-            ("Katzennäschen",
-             "Die Nasenspitze rosa oder schwarz anmalen – ein kleines Dreieck mit runden Ecken. Dann einen Strich runter zur Oberlippe.",
-             "Feiner Pinsel"),
-            ("Schnurrhaare & Punkte",
-             "Auf jede Seite drei geschwungene Schnurrhaare malen und ein paar schwarze Pünktchen auf die weißen Bäckchen.",
-             "Feiner Pinsel"),
-            ("Katzenaugen",
-             "Vom äußeren Augenwinkel einen kleinen Strich schräg nach oben ziehen – fertig ist der Katzenblick.",
-             "Feiner Pinsel"),
-        ])
-    )
 
     static let pumpkin = FaceDesign(
         id: .pumpkin,
@@ -87,7 +38,16 @@ enum DesignCatalog {
             ("Stiel & Glanzpunkte",
              "Oben auf die Stirn einen grünen Stiel mit Ringelranke malen. Ein paar gelbe Glanzpunkte auf die Wangen.",
              "Feiner Pinsel"),
-        ])
+        ]),
+        kids: [.girl, .boy],
+        hairGirl: HairSuggestion(style: .braids, color: HairColor.orange, streak: HairColor.green,
+                                 title: "Kürbis-Zöpfe",
+                                 tip: "Zwei Flechtzöpfe mit orangem Haarspray, grüne Haargummis als Kürbisstiel."),
+        hairBoy: HairSuggestion(style: .spiky, color: HairColor.orange, streak: HairColor.green,
+                                title: "Kürbis-Stacheln",
+                                tip: "Mit Gel kurze Spitzen hochzwirbeln und die Spitzen orange ansprayen."),
+        sound: SpookSound(phrase: "Süßes oder Saures!", pitch: 1.2, rate: 0.5),
+        mouthEmojis: ["🍬", "🍭", "🎃"]
     )
 
     static let witch = FaceDesign(
@@ -114,7 +74,16 @@ enum DesignCatalog {
             ("Warze & Lippen",
              "Eine braune Warze neben die Nase tupfen und die Lippen dunkellila anmalen. Glitzer drauf – hex-hex!",
              "Feiner Pinsel"),
-        ])
+        ]),
+        kids: [.girl],
+        hairGirl: HairSuggestion(style: .long, color: HairColor.black, streak: HairColor.purple, accessory: .witchHat,
+                                 title: "Lange Hexenmähne",
+                                 tip: "Haare offen und leicht toupiert, eine lila Strähne einsprayen – Hexenhut drauf!"),
+        hairBoy: HairSuggestion(style: .wild, color: HairColor.darkBrown, streak: HairColor.green, accessory: .witchHat,
+                                title: "Zauberer-Strubbel",
+                                tip: "Haare wild verwuscheln, ein paar grüne Spray-Strähnen und der spitze Hut."),
+        sound: SpookSound(phrase: "Hihihihi! Hex hex!", pitch: 1.8, rate: 0.6),
+        mouthEmojis: ["✨", "⭐️", "🧪"]
     )
 
     static let spiderweb = FaceDesign(
@@ -141,7 +110,16 @@ enum DesignCatalog {
             ("Tautropfen-Glitzer",
              "Ein paar Glitzerpunkte auf das Netz setzen, als hätte der Nebel Tautropfen hinterlassen.",
              "Glitzergel"),
-        ])
+        ]),
+        kids: [.girl, .boy],
+        hairGirl: HairSuggestion(style: .ponytail, color: HairColor.black, streak: HairColor.silver,
+                                 title: "Spinnen-Pferdeschwanz",
+                                 tip: "Hoher Zopf, silbernes Spray als Spinnenfäden und eine Plastikspinne ins Haargummi."),
+        hairBoy: HairSuggestion(style: .slicked, color: HairColor.black, streak: HairColor.silver,
+                                title: "Glatt nach hinten",
+                                tip: "Mit Gel nach hinten kämmen, ein paar silberne Spray-Fäden darüber."),
+        sound: SpookSound(phrase: "Krabbel krabbel krabbel!", pitch: 1.5, rate: 0.6),
+        mouthEmojis: ["🕷️", "🕸️"]
     )
 
     static let bat = FaceDesign(
@@ -165,7 +143,16 @@ enum DesignCatalog {
             ("Weiße Details",
              "Zwei weiße Pünktchen als Fledermaus-Augen und feine weiße Linien in die Flügel.",
              "Feiner Pinsel"),
-        ])
+        ]),
+        kids: [.girl, .boy],
+        hairGirl: HairSuggestion(style: .pigtails, color: HairColor.black, streak: HairColor.purple,
+                                 title: "Fledermaus-Zöpfe",
+                                 tip: "Zwei hohe Zöpfe wie Fledermausohren, lila Strähnen einsprayen."),
+        hairBoy: HairSuggestion(style: .spiky, color: HairColor.black, streak: HairColor.purple,
+                                title: "Spitze Ohren-Frisur",
+                                tip: "Zwei Strähnen links und rechts mit Gel zu spitzen Fledermausohren drehen."),
+        sound: SpookSound(phrase: "Fiiiep fiiiep!", pitch: 2.0, rate: 0.55),
+        mouthEmojis: ["🦇"]
     )
 
     static let vampire = FaceDesign(
@@ -192,10 +179,19 @@ enum DesignCatalog {
             ("Rote Lippen",
              "Die Lippen kräftig rot ausmalen.",
              "Feiner Pinsel"),
-            ("Zähnchen & Tropfen",
-             "Unter jeden Mundwinkel einen weißen Zahn mit schwarzer Kontur. Ein kleiner roter Tropfen darunter – fertig.",
+            ("Spitze Vampirzähne",
+             "Von der Oberlippe aus zwei lange, leicht gebogene Eckzähne über die Unterlippe malen. Weiß füllen, eine Seite hellgrau schattieren, dünn schwarz umranden. Ein roter Tropfen an einer Zahnspitze.",
              "Feiner Pinsel"),
-        ])
+        ]),
+        kids: [.girl, .boy],
+        hairGirl: HairSuggestion(style: .long, color: HairColor.black, streak: HairColor.red,
+                                 title: "Vampir-Lady",
+                                 tip: "Haare streng mittig scheiteln, glatt kämmen und eine blutrote Strähne einsprayen."),
+        hairBoy: HairSuggestion(style: .slicked, color: HairColor.black,
+                                title: "Dracula-Gel",
+                                tip: "Mit viel Gel glatt nach hinten kämmen – vorne ein spitzer Haaransatz."),
+        sound: SpookSound(phrase: "Bluuut! Äh, ich meine Ketchup!", pitch: 0.8, rate: 0.42),
+        mouthEmojis: ["🦇", "🩸"]
     )
 
     static let skeleton = FaceDesign(
@@ -225,7 +221,16 @@ enum DesignCatalog {
             ("Knochenschatten",
              "Grau unter die Wangenknochen tupfen, damit das Gesicht schön hohl wirkt.",
              "Schwamm"),
-        ])
+        ]),
+        kids: [.boy, .girl],
+        hairGirl: HairSuggestion(style: .braids, color: HairColor.black, streak: HairColor.white,
+                                 title: "Knochen-Zöpfe",
+                                 tip: "Zwei Flechtzöpfe, weiße Spray-Streifen dazwischen wie kleine Rippen."),
+        hairBoy: HairSuggestion(style: .slicked, color: HairColor.black, streak: HairColor.white,
+                                title: "Totenkopf-Glatt",
+                                tip: "Glatt nach hinten gegelt, damit der Schädel schön rund aussieht."),
+        sound: SpookSound(phrase: "Klapper klapper klapper!", pitch: 1.2, rate: 0.6),
+        mouthEmojis: ["🦴", "💀"]
     )
 
     static let frankenstein = FaceDesign(
@@ -255,7 +260,16 @@ enum DesignCatalog {
             ("Schrauben",
              "Links und rechts unten am Kiefer je eine graue Schraube mit schwarzer Kontur malen.",
              "Feiner Pinsel"),
-        ])
+        ]),
+        kids: [.boy],
+        hairGirl: HairSuggestion(style: .wild, color: HairColor.black, streak: HairColor.white,
+                                 title: "Monsterbraut",
+                                 tip: "Haare hoch toupieren und zwei weiße Blitz-Strähnen an den Seiten einsprayen."),
+        hairBoy: HairSuggestion(style: .flatTop, color: HairColor.black,
+                                title: "Eckiger Flat-Top",
+                                tip: "Haare mit Gel steil hochstellen und oben platt drücken – wie ein Kasten."),
+        sound: SpookSound(phrase: "Uuuaaargh!", pitch: 0.55, rate: 0.35),
+        mouthEmojis: ["⚡️", "🔩"]
     )
 
     static let cyclops = FaceDesign(
@@ -282,35 +296,18 @@ enum DesignCatalog {
             ("Monsterpunkte",
              "Ein paar lila und grüne Punkte auf Wangen und Nase tupfen – fertig ist das Monster.",
              "Feiner Pinsel"),
-        ])
+        ]),
+        kids: [.boy, .girl],
+        hairGirl: HairSuggestion(style: .buns, color: HairColor.green,
+                                 title: "Monster-Dutts",
+                                 tip: "Zwei Dutts oben auf dem Kopf, grün angesprayt – sieht aus wie Monster-Hörnchen."),
+        hairBoy: HairSuggestion(style: .spiky, color: HairColor.green,
+                                title: "Grüne Monster-Stacheln",
+                                tip: "Mit Gel Stacheln formen und grün ansprayen."),
+        sound: SpookSound(phrase: "Ich seeeh dich!", pitch: 0.7, rate: 0.4),
+        mouthEmojis: ["👁️", "👀"]
     )
 
-    static let devil = FaceDesign(
-        id: .devil,
-        name: "Kleines Teufelchen",
-        emoji: "😈",
-        tagline: "Rote Bäckchen, Hörnchen und ein freches Spitzbärtchen.",
-        difficulty: .easy,
-        minutes: 10,
-        accent: Spook.blood,
-        colors: [Paint.red, Paint.darkRed, Paint.black],
-        tools: ["Schwamm", "Dicker Pinsel", "Feiner Pinsel"],
-        tip: "Die Hörnchen sitzen am besten direkt am Haaransatz – dann sieht es aus, als würden sie aus dem Kopf wachsen.",
-        steps: .steps([
-            ("Teufelsrot",
-             "Das Gesicht mit roter Farbe betupfen, Augen und Lippen frei lassen. Ruhig etwas fleckig – das wirkt feurig.",
-             "Schwamm"),
-            ("Hörnchen",
-             "Zwei gebogene, spitze Hörner auf die Stirn malen, mit Dunkelrot füllen und schwarz umranden.",
-             "Dicker Pinsel"),
-            ("Freche Brauen",
-             "Zwei dicke schwarze Brauen malen, die zur Nase hin nach unten zeigen – so guckt das Teufelchen frech.",
-             "Dicker Pinsel"),
-            ("Spitzbart & Grinsen",
-             "Unter die Lippe ein schwarzes Spitzbärtchen malen und die Mundwinkel mit einem kleinen Haken nach oben ziehen.",
-             "Feiner Pinsel"),
-        ])
-    )
 
     static let mummy = FaceDesign(
         id: .mummy,
@@ -336,7 +333,16 @@ enum DesignCatalog {
             ("Schattenlinien",
              "An die Oberkante jeder Binde eine dünne graue Linie malen. Dadurch wirken die Binden plastisch.",
              "Feiner Pinsel"),
-        ])
+        ]),
+        kids: [.boy, .girl],
+        hairGirl: HairSuggestion(style: .bandaged, color: HairColor.beige,
+                                 title: "Ganz eingewickelt",
+                                 tip: "Haare zum Dutt, dann eine Mullbinde locker um den Kopf wickeln."),
+        hairBoy: HairSuggestion(style: .bandaged, color: HairColor.beige,
+                                title: "Mumien-Turban",
+                                tip: "Mullbinde oder zerrissenes weißes Tuch um den Kopf wickeln, Enden hängen lassen."),
+        sound: SpookSound(phrase: "Mmmmmh. Mmmmmmh!", pitch: 0.6, rate: 0.25),
+        mouthEmojis: ["💨", "🪲"]
     )
 
     static let werewolf = FaceDesign(
@@ -360,10 +366,19 @@ enum DesignCatalog {
             ("Fellstriche",
              "Mit Dunkelbraun viele kurze Striche am Gesichtsrand und über den Augenbrauen malen – wie zotteliges Fell.",
              "Feiner Pinsel"),
-            ("Wolfsnase & Zähne",
-             "Die Nasenspitze schwarz malen, einen Strich zur Oberlippe ziehen, Lippen schwarz. Zwei weiße Reißzähne an die Mundwinkel.",
+            ("Wolfsnase & Knurr-Zähne",
+             "Die Nasenspitze schwarz, Strich zur Oberlippe, die Lippen breit schwarz. Darauf oben eine Reihe spitzer weißer Zähne mit zwei langen Reißzähnen, unten kleinere – alles dünn schwarz umranden.",
              "Feiner Pinsel"),
-        ])
+        ]),
+        kids: [.boy],
+        hairGirl: HairSuggestion(style: .wild, color: HairColor.brown, streak: HairColor.grey,
+                                 title: "Wolfsmähne",
+                                 tip: "Haare kopfüber kräftig toupieren, graue Spray-Strähnen – je wilder, desto besser."),
+        hairBoy: HairSuggestion(style: .wild, color: HairColor.brown, streak: HairColor.grey,
+                                title: "Zottelfell",
+                                tip: "Mit Haarwachs in alle Richtungen zwirbeln und graue Strähnen einsprayen."),
+        sound: SpookSound(phrase: "Auuuuuuuuuh!", pitch: 0.8, rate: 0.3),
+        mouthEmojis: ["🌕", "🐾"]
     )
 
     static let sugarSkull = FaceDesign(
@@ -393,6 +408,241 @@ enum DesignCatalog {
             ("Verzierungen",
              "Eine gelbe Blume auf die Stirn, Schnörkel auf die Wangen und eine Punktereihe ans Kinn.",
              "Feiner Pinsel"),
-        ])
+        ]),
+        kids: [.girl],
+        hairGirl: HairSuggestion(style: .long, color: HairColor.black, accessory: .flowers,
+                                 title: "Blumenkranz",
+                                 tip: "Haare offen mit Mittelscheitel, ein bunter Blumenkranz obendrauf."),
+        hairBoy: HairSuggestion(style: .slicked, color: HairColor.black, accessory: .flowers,
+                                title: "Gegelt mit Blume",
+                                tip: "Glatt zurückgekämmt und eine große Blume hinters Ohr."),
+        sound: SpookSound(phrase: "Hola! Buh!", pitch: 1.3, rate: 0.5),
+        mouthEmojis: ["🌸", "🌼", "💐"]
+    )
+
+    // MARK: - Drei Gespenster: süß, lustig, super gruselig
+
+    static let ghostCute = FaceDesign(
+        id: .ghostCute,
+        name: "Süßes Gespensterchen",
+        emoji: "👻",
+        tagline: "Kulleraugen, rosa Bäckchen und zwei Mini-Geister. Zum Knuddeln!",
+        difficulty: .superEasy,
+        minutes: 8,
+        accent: Spook.candy,
+        colors: [Paint.white, Paint.black, Paint.pink, Paint.lightBlue],
+        tools: ["Schminkschwamm", "Feiner Pinsel", "Wattestäbchen"],
+        tip: "Die Bäckchen mit dem Wattestäbchen in kleinen Kreisen auftupfen – dann werden sie schön weich und rund.",
+        steps: .steps([
+            ("Zartes Weiß",
+             "Das Gesicht dünn weiß betupfen. Ruhig etwas Haut durchschimmern lassen – das wirkt lieb statt gruselig.",
+             "Schwamm"),
+            ("Kulleraugen",
+             "Um jedes Auge einen runden schwarzen Ring malen und oben außen drei kleine Wimpern.",
+             "Feiner Pinsel"),
+            ("Bäckchen & Lächeln",
+             "Rosa Bäckchen tupfen und mit Schwarz ein kleines Lächeln über die Lippen malen.",
+             "Wattestäbchen"),
+            ("Mini-Gespenster",
+             "Ein kleines weißes Gespenst auf die Stirn und eins auf die Wange – mit zwei Punktaugen. Dazu hellblaue Glitzersternchen.",
+             "Feiner Pinsel"),
+        ]),
+        kids: [.girl],
+        hairGirl: HairSuggestion(style: .pigtails, color: HairColor.white, accessory: .bow,
+                                 title: "Weiße Schleifen-Zöpfe",
+                                 tip: "Zwei Zöpfe mit weißem Haarspray pudern und eine große Schleife dazu."),
+        hairBoy: HairSuggestion(style: .short, color: HairColor.white,
+                                title: "Weiß gepudert",
+                                tip: "Kurze Haare mit weißem Spray oder etwas Babypuder bestäuben."),
+        sound: SpookSound(phrase: "Buh! Hihi!", pitch: 1.9, rate: 0.45),
+        mouthEmojis: ["👻", "💖"]
+    )
+
+    static let ghostFunny = FaceDesign(
+        id: .ghostFunny,
+        name: "Glubsch-Gespenst",
+        emoji: "🤪",
+        tagline: "Schiefe Glubschaugen und Zunge raus – Buuuh, hihi!",
+        difficulty: .superEasy,
+        minutes: 10,
+        accent: Spook.lightBlueAccent,
+        colors: [Paint.white, Paint.black, Paint.red, Paint.lightBlue],
+        tools: ["Schminkschwamm", "Dicker Pinsel", "Feiner Pinsel"],
+        tip: "Ruhig absichtlich schief malen – je ungleicher die Augen, desto lustiger!",
+        steps: .steps([
+            ("Weiß grundieren",
+             "Das ganze Gesicht weiß betupfen, die Augen frei lassen.",
+             "Schwamm"),
+            ("Glubschaugen",
+             "Um ein Auge einen riesigen, um das andere einen kleinen schwarzen Ring malen. Eine Braue hoch, eine schief.",
+             "Dicker Pinsel"),
+            ("Zunge raus",
+             "Den Mund schwarz ausmalen und darunter eine rote Zunge, die frech herausguckt.",
+             "Feiner Pinsel"),
+            ("Wackel-Rand",
+             "Mit Hellblau eine wellige Linie rund ums Gesicht ziehen – wie ein wabbelnder Geist.",
+             "Feiner Pinsel"),
+        ]),
+        kids: [.girl, .boy],
+        hairGirl: HairSuggestion(style: .wild, color: HairColor.white, streak: HairColor.pink,
+                                 title: "Strubbel-Geist",
+                                 tip: "Haare wild toupieren, weiß ansprayen und eine rosa Strähne dazu."),
+        hairBoy: HairSuggestion(style: .spiky, color: HairColor.white,
+                                title: "Elektrisiert",
+                                tip: "Mit Gel in alle Richtungen hochstellen – als hätte der Geist in die Steckdose gefasst."),
+        sound: SpookSound(phrase: "Buuuuh! Hihihi!", pitch: 1.4, rate: 0.5),
+        mouthEmojis: ["👻", "😜"]
+    )
+
+    static let ghostScary = FaceDesign(
+        id: .ghostScary,
+        name: "Schreckgespenst",
+        emoji: "😱",
+        tagline: "Hohle Augen, schwarze Tränen, Schreimund. Nichts für schwache Nerven!",
+        difficulty: .medium,
+        minutes: 20,
+        accent: Color(hex: 0xB8B4C8),
+        colors: [Paint.white, Paint.grey, Paint.black, Paint.purple],
+        tools: ["Schminkschwamm", "Dicker Pinsel", "Feiner Pinsel"],
+        tip: "Für die Tränen einen Tropfen Wasser auf den Pinsel – dann läuft die Farbe von allein richtig gruselig nach unten.",
+        steps: .steps([
+            ("Totenbleich",
+             "Weiß deckend auftupfen und an den Rändern mit Grau schattieren, damit das Gesicht eingefallen wirkt.",
+             "Schwamm"),
+            ("Hohle Augen",
+             "Große schwarze Ovale um die Augen, nach außen grau verwischen.",
+             "Dicker Pinsel"),
+            ("Schwarze Tränen",
+             "Unter jedem Auge drei dünne, unterschiedlich lange Laufspuren nach unten ziehen.",
+             "Feiner Pinsel"),
+            ("Schreimund",
+             "Einen langgezogenen schwarzen Mund über die Lippen bis zum Kinn malen, unten mit Tropfen.",
+             "Dicker Pinsel"),
+            ("Risse & Adern",
+             "Feine graue und lila Risse auf Stirn und Schläfen, die sich verästeln.",
+             "Feiner Pinsel"),
+        ]),
+        kids: [.boy, .girl],
+        hairGirl: HairSuggestion(style: .long, color: HairColor.grey,
+                                 title: "Nasse Strähnen",
+                                 tip: "Haare nass machen und strähnig ins Gesicht hängen lassen, grau ansprayen."),
+        hairBoy: HairSuggestion(style: .wild, color: HairColor.grey,
+                                title: "Zerzaust aus der Gruft",
+                                tip: "Grau einsprayen und völlig zerzausen – wie nach 100 Jahren im Grab."),
+        sound: SpookSound(phrase: "Buuuuuuuuuuuh!", pitch: 0.5, rate: 0.2),
+        mouthEmojis: ["👻", "💀"]
+    )
+
+    // MARK: - Katze, Teufel, Fledermaus-Schwarm
+
+    static let cat = FaceDesign(
+        id: .cat,
+        name: "Schmuse-Katze",
+        emoji: "🐱",
+        tagline: "Fell, Öhrchen, Schnäuzchen und ein richtiger Katzenblick. Miau!",
+        difficulty: .easy,
+        minutes: 12,
+        accent: Spook.candy,
+        colors: [Paint.white, Paint.black, Paint.grey, Paint.pink],
+        tools: ["Schminkschwamm", "Feiner Pinsel", "Dicker Pinsel"],
+        tip: "Fellstriche immer in Wuchsrichtung malen – an der Stirn nach oben, an den Wangen nach außen.",
+        steps: .steps([
+            ("Fell am Rand",
+             "Grau am Gesichtsrand auftupfen und nach innen verwischen. Drei dunkle Tigerstreifen mitten auf die Stirn.",
+             "Schwamm"),
+            ("Weiße Schnauze",
+             "Zwei dicke weiße Schnäuzchen-Bäckchen über die Oberlippe und einen weißen Fleck aufs Kinn.",
+             "Schwamm"),
+            ("Katzennase & Mäulchen",
+             "Nasenspitze rosa mit schwarzem Rand, ein Strich zur Lippe und links und rechts ein kleiner Bogen – das typische Katzenmäulchen ‚ω‘.",
+             "Feiner Pinsel"),
+            ("Schnurrhaare & Punkte",
+             "Drei lange geschwungene Schnurrhaare pro Seite und schwarze Pünktchen auf die Schnauze.",
+             "Feiner Pinsel"),
+            ("Katzenaugen & Öhrchen",
+             "Dicke Lidstriche mit Schwung nach außen und unten innen eine kleine Spitze. Oben an der Stirn zwei schwarze Öhrchen mit rosa Innenseite.",
+             "Dicker Pinsel"),
+        ]),
+        kids: [.girl],
+        hairGirl: HairSuggestion(style: .buns, color: HairColor.black, accessory: .catEars,
+                                 title: "Katzenohr-Dutts",
+                                 tip: "Zwei kleine Dutts oben wie Katzenohren – oder ein Haarreif mit Öhrchen."),
+        hairBoy: HairSuggestion(style: .short, color: HairColor.darkBrown, accessory: .catEars,
+                                title: "Kater mit Öhrchen",
+                                tip: "Kurze Haare verwuscheln und einen Ohren-Haarreif aufsetzen."),
+        sound: SpookSound(phrase: "Miauuuuu! Schnurrr!", pitch: 1.9, rate: 0.35),
+        mouthEmojis: ["🐾", "🐟", "💕"]
+    )
+
+    static let devil = FaceDesign(
+        id: .devil,
+        name: "Feuerteufel",
+        emoji: "😈",
+        tagline: "Glühend rot, mit Flammen-Brauen und spitzen Hörnern.",
+        difficulty: .easy,
+        minutes: 15,
+        accent: Spook.blood,
+        colors: [Paint.red, Paint.darkRed, Paint.black, Paint.orange, Paint.yellow],
+        tools: ["Schwamm", "Dicker Pinsel", "Feiner Pinsel"],
+        tip: "Das Dunkelrot am Rand mit dem fast trockenen Schwamm einarbeiten – so glüht die Mitte richtig.",
+        steps: .steps([
+            ("Glühendes Rot",
+             "Das ganze Gesicht kräftig rot betupfen, Augen und Lippen frei lassen.",
+             "Schwamm"),
+            ("Dunkler Rand",
+             "Am Gesichtsrand Dunkelrot auftupfen und zur Mitte hin weich auslaufen lassen.",
+             "Schwamm"),
+            ("Hörner",
+             "Zwei lange, gebogene Hörner aus dem Haaransatz malen, dunkelrot füllen, eine helle Glanzlinie und schwarze Kontur.",
+             "Dicker Pinsel"),
+            ("Flammen",
+             "Spitze schwarze Brauen nach oben außen ziehen und auf die Stirnmitte drei orange-gelbe Flammen malen.",
+             "Feiner Pinsel"),
+            ("Teufelsbart",
+             "Ein schwarzes Spitzbärtchen mit Kringel unter die Lippe und unter jedes Auge eine kleine schwarze Raute.",
+             "Feiner Pinsel"),
+        ]),
+        kids: [.boy, .girl],
+        hairGirl: HairSuggestion(style: .buns, color: HairColor.red, accessory: .horns,
+                                 title: "Teufelshörnchen-Dutts",
+                                 tip: "Zwei feste Dutts oben am Kopf, rot ansprayen – die sehen selbst schon aus wie Hörner."),
+        hairBoy: HairSuggestion(style: .spiky, color: HairColor.black, streak: HairColor.red, accessory: .horns,
+                                title: "Feuer-Spitzen",
+                                tip: "Gel-Spitzen nach oben, die Spitzen rot-orange ansprayen wie Flammen."),
+        sound: SpookSound(phrase: "Muahahahaha!", pitch: 0.6, rate: 0.45),
+        mouthEmojis: ["🔥"]
+    )
+
+    static let batSwarm = FaceDesign(
+        id: .batSwarm,
+        name: "Fledermaus-Schwarm",
+        emoji: "🌙",
+        tagline: "Kleine Fledermäuse flattern über die Wange zum Vollmond.",
+        difficulty: .superEasy,
+        minutes: 8,
+        accent: Spook.moon,
+        colors: [Paint.black, Paint.yellow, Paint.purple, Paint.white],
+        tools: ["Schwamm", "Feiner Pinsel"],
+        tip: "Fledermäuse gehen ganz leicht: ein Punkt als Körper, dann links und rechts je ein ‚W‘ als Flügel.",
+        steps: .steps([
+            ("Vollmond",
+             "Mit dem Schwamm einen hellgelben Mond an die Schläfe tupfen, Rand lila verwischen.",
+             "Schwamm"),
+            ("Fledermäuse",
+             "Von der Wange hoch zur Stirn sechs schwarze Fledermäuse malen – unten klein, zum Mond hin größer.",
+             "Feiner Pinsel"),
+            ("Glanz & Äuglein",
+             "Ein lila Schimmer unter die Fledermäuse und den großen zwei weiße Pünktchen als Augen.",
+             "Feiner Pinsel"),
+        ]),
+        kids: [.girl, .boy],
+        hairGirl: HairSuggestion(style: .ponytail, color: HairColor.purple,
+                                 title: "Nacht-Pferdeschwanz",
+                                 tip: "Hoher Zopf mit lila Spray und kleinen Glitzer-Sternchen."),
+        hairBoy: HairSuggestion(style: .short, color: HairColor.black, streak: HairColor.purple,
+                                title: "Mitternachts-Look",
+                                tip: "Kurz und verwuschelt mit ein paar lila Spray-Spitzen."),
+        sound: SpookSound(phrase: "Fiiep! Fiiep! Fiiep!", pitch: 2.0, rate: 0.6),
+        mouthEmojis: ["🦇", "🌙"]
     )
 }

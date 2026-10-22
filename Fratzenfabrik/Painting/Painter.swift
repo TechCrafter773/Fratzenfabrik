@@ -100,3 +100,46 @@ func star(_ c: CGPoint, _ r: CGFloat, points: Int = 5, rotation: CGFloat = 0) ->
 func mirrored(_ p: Path, aroundX x: CGFloat = 0) -> Path {
     p.applying(CGAffineTransform(translationX: x, y: 0).scaledBy(x: -1, y: 1).translatedBy(x: -x, y: 0))
 }
+
+/// Kleines Gespenst: runder Kopf, wellige Unterkante.
+func miniGhost(_ c: CGPoint, _ r: CGFloat) -> Path {
+    var p = Path()
+    p.move(to: pt(c.x - r, c.y))
+    p.addQuadCurve(to: pt(c.x, c.y - r), control: pt(c.x - r, c.y - r))
+    p.addQuadCurve(to: pt(c.x + r, c.y), control: pt(c.x + r, c.y - r))
+    p.addLine(to: pt(c.x + r, c.y + 1.1 * r))
+    p.addQuadCurve(to: pt(c.x + r / 3, c.y + 1.1 * r), control: pt(c.x + 2 * r / 3, c.y + 1.5 * r))
+    p.addQuadCurve(to: pt(c.x - r / 3, c.y + 1.1 * r), control: pt(c.x, c.y + 0.8 * r))
+    p.addQuadCurve(to: pt(c.x - r, c.y + 1.1 * r), control: pt(c.x - 2 * r / 3, c.y + 1.5 * r))
+    p.closeSubpath()
+    return p
+}
+
+/// Kleine Fledermaus mit Flügeln und Öhrchen. `flap` lässt die Flügel schlagen.
+func batGlyph(_ c: CGPoint, _ size: CGFloat, _ angle: CGFloat, flap: CGFloat = 0) -> [Path] {
+    var wing = Path()
+    wing.move(to: pt(0, -0.2))
+    wing.addQuadCurve(to: pt(1.0, -0.45 - flap), control: pt(0.5, -0.68 - flap))
+    wing.addQuadCurve(to: pt(0.7, -0.04), control: pt(0.96, -0.15))
+    wing.addQuadCurve(to: pt(0.42, 0.05), control: pt(0.56, -0.12))
+    wing.addQuadCurve(to: pt(0.12, 0.2), control: pt(0.24, -0.02))
+    wing.addLine(to: pt(0, 0.25))
+    wing.closeSubpath()
+    let ear = polygon([pt(0.02, -0.2), pt(0.12, -0.42), pt(0.14, -0.16)])
+    let shapes = [wing, mirrored(wing), ear, mirrored(ear), ellipse(pt(0, 0), 0.14, 0.26)]
+    let t = CGAffineTransform(translationX: c.x, y: c.y).rotated(by: angle).scaledBy(x: size, y: size)
+    return shapes.map { $0.applying(t) }
+}
+
+/// Eine züngelnde Flamme, die von `base` nach oben brennt.
+func flame(_ base: CGPoint, _ h: CGFloat, _ w: CGFloat) -> Path {
+    var p = Path()
+    p.move(to: pt(base.x - w, base.y))
+    p.addQuadCurve(to: pt(base.x - w * 0.2, base.y - h * 0.55), control: pt(base.x - w * 1.1, base.y - h * 0.35))
+    p.addQuadCurve(to: pt(base.x + w * 0.15, base.y - h), control: pt(base.x - w * 0.35, base.y - h * 0.8))
+    p.addQuadCurve(to: pt(base.x + w * 0.35, base.y - h * 0.45), control: pt(base.x + w * 0.55, base.y - h * 0.7))
+    p.addQuadCurve(to: pt(base.x + w, base.y), control: pt(base.x + w * 1.1, base.y - h * 0.25))
+    p.addQuadCurve(to: pt(base.x - w, base.y), control: pt(base.x, base.y + w * 0.6))
+    p.closeSubpath()
+    return p
+}

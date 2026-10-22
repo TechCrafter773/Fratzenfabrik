@@ -2,10 +2,13 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var filter: Difficulty?
+    @State private var kidFilter: Kid?
     @State private var mirror: MirrorLaunch?
 
     private var designs: [FaceDesign] {
-        DesignCatalog.all.filter { filter == nil || $0.difficulty == filter }
+        DesignCatalog.all.filter {
+            (filter == nil || $0.difficulty == filter) && (kidFilter == nil || $0.kids.contains(kidFilter!))
+        }
     }
 
     var body: some View {
@@ -26,7 +29,7 @@ struct HomeView: View {
 
                         VStack(spacing: 10) {
                             Button {
-                                mirror = MirrorLaunch(design: DesignCatalog.all.randomElement()?.id ?? .ghost)
+                                mirror = MirrorLaunch(design: designs.randomElement()?.id ?? .ghostCute)
                             } label: {
                                 Label("Spuk-Spiegel starten", systemImage: "camera.fill")
                             }
@@ -44,12 +47,14 @@ struct HomeView: View {
                         LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)], spacing: 18) {
                             ForEach(Array(designs.enumerated()), id: \.element.id) { index, design in
                                 NavigationLink(value: design) {
-                                    DesignCard(design: design, tilt: index.isMultiple(of: 2) ? -1.8 : 1.6)
+                                    DesignCard(design: design, kid: kidFilter ?? design.preferredKid,
+                                               tilt: index.isMultiple(of: 2) ? -1.8 : 1.6)
                                 }
                                 .buttonStyle(PressableStyle())
                             }
                         }
                         .animation(.spring(response: 0.4, dampingFraction: 0.7), value: filter)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: kidFilter)
 
                         SafetyCard()
 
@@ -65,7 +70,7 @@ struct HomeView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: FaceDesign.self) { design in
-                DesignDetailView(design: design)
+                DesignDetailView(design: design, initialKid: kidFilter ?? design.preferredKid)
             }
         }
         .fullScreenCover(item: $mirror) { launch in
@@ -74,9 +79,24 @@ struct HomeView: View {
     }
 
     private var filterBar: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                KidChip(title: "🍬 Alle", color: Spook.slime, selected: kidFilter == nil) { kidFilter = nil }
+                KidChip(title: "👧 Mädchen", color: Spook.candy, selected: kidFilter == .girl) {
+                    kidFilter = kidFilter == .girl ? nil : .girl
+                }
+                KidChip(title: "👦 Jungs", color: Spook.lightBlueAccent, selected: kidFilter == .boy) {
+                    kidFilter = kidFilter == .boy ? nil : .boy
+                }
+            }
+            difficultyBar
+        }
+    }
+
+    private var difficultyBar: some View {
         ScrollView(.horizontal) {
             HStack(spacing: 10) {
-                FilterChip(title: "🍬 Alle", selected: filter == nil) { filter = nil }
+                FilterChip(title: "Alle Stufen", selected: filter == nil) { filter = nil }
                 ForEach(Difficulty.allCases) { level in
                     FilterChip(title: "\(level.pumpkins) \(level.label)", selected: filter == level) {
                         filter = filter == level ? nil : level
@@ -87,6 +107,29 @@ struct HomeView: View {
             .padding(.vertical, 4)
         }
         .scrollIndicators(.hidden)
+    }
+}
+
+/// Großer Mädchen/Jungs-Umschalter.
+struct KidChip: View {
+    let title: String
+    let color: Color
+    let selected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(Spook.title(16))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .foregroundStyle(selected ? Spook.night : .white)
+                .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(selected ? color : Color.white.opacity(0.1)))
+                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(color.opacity(selected ? 0 : 0.6), lineWidth: 2))
+                .glow(selected ? color : .clear, radius: 8)
+        }
+        .buttonStyle(PressableStyle())
+        .sensoryFeedback(.selection, trigger: selected)
     }
 }
 
@@ -120,14 +163,16 @@ struct PressableStyle: ButtonStyle {
 
 struct DesignCard: View {
     let design: FaceDesign
+    let kid: Kid
     var tilt: Double = 0
 
     var body: some View {
         VStack(spacing: 8) {
             ZStack(alignment: .topTrailing) {
-                DesignPreview(design: design.id, animated: false)
-                    .frame(height: 150)
+                KidThumbnail(design: design, kid: kid)
+                    .frame(height: 170)
                     .frame(maxWidth: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                 Text(design.emoji)
                     .font(.system(size: 30))
                     .rotationEffect(.degrees(14))
