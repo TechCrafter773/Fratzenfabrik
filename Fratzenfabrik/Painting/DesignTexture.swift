@@ -15,8 +15,14 @@ enum TextureSpace {
     }
 
     /// Das Standardgesicht, abgebildet auf ein Bild dieser Größe.
-    static func face(in size: CGSize) -> FaceGeometry {
+    static func face(in size: CGSize, mood: FaceMood = .neutral) -> FaceGeometry {
         var face = FaceGeometry.canonical
+        // Mundwinkel nach oben (Lächeln) oder unten (Grummeln)
+        let bend: CGFloat = mood == .smile ? -0.1 : (mood == .grumpy ? 0.08 : 0)
+        face.mouthOuter = face.mouthOuter.map { q in
+            let t = q.x / face.mouthHalfWidth
+            return CGPoint(x: q.x * (mood == .smile ? 1.08 : 1), y: q.y + bend * t * t)
+        }
         // Etwas schmaler als der Kopf, damit die Schminke vorne auf den Wangen ausläuft
         // statt hart an der Kopfseite zu enden. Kleine Augenaussparung: dort sitzen die Augäpfel.
         face.faceHalfWidth = 0.98
@@ -37,7 +43,7 @@ enum SkinPainter {
     static let skin = Color(hex: 0xF2C29E)
     static let skinUI = UIColor(hex: 0xF2C29E)
 
-    static func draw(_ f: FaceGeometry, kid: Kid, in ctx: GraphicsContext, size: CGSize) {
+    static func draw(_ f: FaceGeometry, kid: Kid, mood: FaceMood, in ctx: GraphicsContext, size: CGSize) {
         ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(skin))
         let p = Painter(ctx: ctx, face: f, alpha: 1, time: 0)
         // Leichte Rötung an Wangen, Nase und Kinn – wirkt lebendiger
@@ -48,12 +54,20 @@ enum SkinPainter {
         p.fill(f.eyes.map { ellipse($0.center, 0.3, 0.2) }, Color(hex: 0xC98F7A), opacity: 0.3, soft: 0.06)
         // Augenbrauen
         let browColor = Color(hex: 0x5A3A22)
-        p.stroke([curve(pt(-0.74, f.browY + 0.03), pt(-0.5, f.browY - 0.07), pt(-0.27, f.browY + 0.02)),
-                  curve(pt(0.27, f.browY + 0.02), pt(0.5, f.browY - 0.07), pt(0.74, f.browY + 0.03))],
+        // Brauen: beim Lächeln hochgezogen, beim Grummeln zur Nase hin abgesenkt
+        let lift: CGFloat = mood == .smile ? -0.05 : 0
+        let inner: CGFloat = mood == .grumpy ? 0.1 : 0
+        p.stroke([curve(pt(-0.74, f.browY + 0.03 + lift), pt(-0.5, f.browY - 0.07 + lift), pt(-0.27, f.browY + 0.02 + inner)),
+                  curve(pt(0.27, f.browY + 0.02 + inner), pt(0.5, f.browY - 0.07 + lift), pt(0.74, f.browY + 0.03 + lift))],
                  browColor, width: kid == .girl ? 0.045 : 0.06, opacity: 0.9, soft: 0.01)
         // Lippen
         p.fill(f.mouthPath(), kid == .girl ? Color(hex: 0xE07A8A) : Color(hex: 0xC97A78), opacity: 0.95, soft: 0.01)
-        p.stroke(line(pt(-0.3, f.mouthCenter.y - 0.02), pt(0.3, f.mouthCenter.y - 0.02)), Color(hex: 0x8E4A4E), width: 0.015, opacity: 0.6)
+        let bend: CGFloat = mood == .smile ? -0.12 : (mood == .grumpy ? 0.09 : 0)
+        p.stroke(curve(pt(-0.32, f.mouthCenter.y - 0.02 + bend), pt(0, f.mouthCenter.y - 0.02 - bend), pt(0.32, f.mouthCenter.y - 0.02 + bend)),
+                 Color(hex: 0x8E4A4E), width: 0.015, opacity: 0.6)
+        if mood == .smile {
+            p.fill([circle(pt(-0.62, 0.55), 0.17), circle(pt(0.62, 0.55), 0.17)], Color(hex: 0xF28C8C), opacity: 0.35, soft: 0.08)
+        }
         // Sommersprossen für die Jungs
         if kid == .boy {
             let dots = [(-0.3, 0.42), (-0.4, 0.5), (-0.22, 0.52), (-0.5, 0.4), (0.3, 0.42), (0.4, 0.5), (0.22, 0.52), (0.5, 0.4)]
@@ -68,13 +82,14 @@ enum SkinPainter {
 enum DesignTexture {
     private static var cache: [String: UIImage] = [:]
 
-    static func image(design: DesignID?, visibleSteps: Int? = nil, kid: Kid?, size: CGSize = TextureSpace.pixelSize) -> UIImage? {
-        let key = "\(design?.rawValue ?? "-")|\(visibleSteps ?? -1)|\(kid?.rawValue ?? "-")|\(Int(size.width))"
+    static func image(design: DesignID?, visibleSteps: Int? = nil, kid: Kid?, mood: FaceMood = .neutral,
+                      size: CGSize = TextureSpace.pixelSize) -> UIImage? {
+        let key = "\(design?.rawValue ?? "-")|\(visibleSteps ?? -1)|\(kid?.rawValue ?? "-")|\(mood.rawValue)|\(Int(size.width))"
         if let cached = cache[key] { return cached }
 
         let content = Canvas { ctx, canvasSize in
-            let face = TextureSpace.face(in: canvasSize)
-            if let kid { SkinPainter.draw(face, kid: kid, in: ctx, size: canvasSize) }
+            let face = TextureSpace.face(in: canvasSize, mood: mood)
+            if let kid { SkinPainter.draw(face, kid: kid, mood: mood, in: ctx, size: canvasSize) }
             if let design { FacePainter.draw(design, face: face, in: ctx, visibleSteps: visibleSteps) }
         }
         .frame(width: size.width, height: size.height)

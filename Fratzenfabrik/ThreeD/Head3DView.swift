@@ -14,6 +14,7 @@ struct Head3DView: UIViewRepresentable {
     let hair: HairSuggestion
     var visibleSteps: Int?
     var turn: TurnRequest?
+    var mood: FaceMood = .smile
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
@@ -28,14 +29,14 @@ struct Head3DView: UIViewRepresentable {
         let pan = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.pan(_:)))
         pan.delegate = context.coordinator
         view.addGestureRecognizer(pan)
-        context.coordinator.stage.configure(kid: kid, hair: hair, design: design, visibleSteps: visibleSteps)
+        context.coordinator.stage.configure(kid: kid, hair: hair, design: design, visibleSteps: visibleSteps, mood: mood)
         context.coordinator.startIdleSway()
         return view
     }
 
     func updateUIView(_ view: SCNView, context: Context) {
         let c = context.coordinator
-        c.stage.configure(kid: kid, hair: hair, design: design, visibleSteps: visibleSteps)
+        c.stage.configure(kid: kid, hair: hair, design: design, visibleSteps: visibleSteps, mood: mood)
         if let turn, turn != c.lastTurn {
             c.lastTurn = turn
             c.stopIdleSway()

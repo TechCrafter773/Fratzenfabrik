@@ -7,6 +7,7 @@ struct DesignDetailView: View {
     @State private var mirror: MirrorLaunch?
     @State private var kid: Kid
     @State private var turn: TurnRequest?
+    @State private var mood: FaceMood = .smile
 
     init(design: FaceDesign, initialKid: Kid) {
         self.design = design
@@ -76,7 +77,7 @@ struct DesignDetailView: View {
                 Circle()
                     .fill(RadialGradient(colors: [design.accent.opacity(0.35), .clear], center: .center, startRadius: 10, endRadius: 200))
                 Head3DView(design: design.id, kid: kid, hair: hair,
-                           visibleSteps: selectedStep.map { $0 + 1 }, turn: turn)
+                           visibleSteps: selectedStep.map { $0 + 1 }, turn: turn, mood: mood)
                 HStack(spacing: 10) {
                     turnButton("↶ Seite", yaw: 1.25)
                     turnButton("Vorne", yaw: 0)
@@ -86,6 +87,23 @@ struct DesignDetailView: View {
             }
             .frame(height: 420)
             .frame(maxWidth: .infinity)
+            .overlay(alignment: .topLeading) {
+                HStack(spacing: 6) {
+                    ForEach(FaceMood.allCases) { option in
+                        Button {
+                            mood = option
+                        } label: {
+                            Text(option.emoji)
+                                .font(.system(size: 20))
+                                .frame(width: 38, height: 38)
+                                .background(Circle().fill(mood == option ? Spook.slime.opacity(0.4) : .black.opacity(0.35)))
+                                .overlay(Circle().stroke(Spook.slime.opacity(mood == option ? 1 : 0), lineWidth: 2))
+                        }
+                        .buttonStyle(PressableStyle())
+                        .accessibilityLabel("Gesichtsausdruck \(option.emoji)")
+                    }
+                }
+            }
             .overlay(alignment: .topTrailing) {
                 Text("👆 wischen zum Drehen")
                     .font(Spook.body(11, weight: .bold))

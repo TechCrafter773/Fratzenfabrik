@@ -105,9 +105,13 @@ enum HairBuilder {
             while placed < 210 {
                 guard let hit = scalpPoint(&rng, thetaMax: 1.75) else { continue }
                 let (p, normal) = hit
-                let messy = SIMD3<Float>(Float(rng.next(-0.45, 0.45)), Float(rng.next(-1.7, -0.8)), Float(rng.next(-0.45, 0.45)))
-                clump(at: p + normal * 0.06, toward: normal * 0.6 + messy,
-                      length: Float(rng.next(0.4, 0.8)), radius: Float(rng.next(0.1, 0.16)),
+                // Oben stehen die Büschel wild ab, an den Seiten und hinten hängen sie schwer herunter
+                let top = smoothstep(0.6, 1.6, p.y)
+                let messy = SIMD3<Float>(Float(rng.next(-0.6, 0.6)),
+                                         Float(rng.next(-1.7, -0.8)) * (1 - top) + Float(rng.next(-0.2, 0.5)) * top,
+                                         Float(rng.next(-0.6, 0.6)))
+                clump(at: p + normal * 0.06, toward: normal * (0.6 + 0.6 * top) + messy,
+                      length: Float(rng.next(0.4, 0.8)) - 0.15 * top, radius: Float(rng.next(0.1, 0.16)),
                       mat: furs[placed % furs.count])
                 placed += 1
             }
@@ -126,11 +130,11 @@ enum HairBuilder {
         case .pigtails:
             node.addChildNode(shell(mesh, Shell(thickness: 0.08, volume: 0.1), material))
             for side: Float in [-1, 1] {
-                let tie = SIMD3<Float>(side * 1.12, 0.95, -0.45)
-                sphere(0.24, tie + SIMD3(side * 0.04, 0.03, 0))
-                clump(at: tie, toward: SIMD3(side * 0.18, -1, -0.08), length: 1.7, radius: 0.24)
-                clump(at: tie + SIMD3(0, -0.05, -0.08), toward: SIMD3(side * 0.08, -1, -0.15), length: 1.45, radius: 0.19)
-                add(SCNTorus(ringRadius: 0.13, pipeRadius: 0.045), tie + SIMD3(side * 0.03, -0.12, 0), mat: accent)
+                let tie = SIMD3<Float>(side * 1.18, 1.15, -0.35)
+                sphere(0.3, tie + SIMD3(side * 0.05, 0.04, 0))
+                clump(at: tie, toward: SIMD3(side * 0.35, -1, 0.0), length: 2.0, radius: 0.3)
+                clump(at: tie + SIMD3(0, -0.05, -0.1), toward: SIMD3(side * 0.2, -1, -0.15), length: 1.7, radius: 0.24)
+                add(SCNTorus(ringRadius: 0.17, pipeRadius: 0.05), tie + SIMD3(side * 0.04, -0.16, 0), mat: accent)
             }
         case .long:
             node.addChildNode(shell(mesh, Shell(thickness: 0.09, volume: 0.12), material))
@@ -389,6 +393,28 @@ enum HairBuilder {
                 let p = SIMD3<Float>(1.05 * sin(az), 1.52 - 0.12 * abs(sin(az)), HeadMesh.center.z + 1.1 * cos(az))
                 add(SCNSphere(radius: 0.15), mat(colors[k % colors.count], roughness: 0.5), p, scale: SIMD3(1, 1, 0.6))
                 add(SCNSphere(radius: 0.05), mat(0xFFF1A8), p + SIMD3(0, 0, 0.09))
+            }
+        case .unicornHorn:
+            let gold = mat(0xFFD24A, roughness: 0.25)
+            gold.metalness.contents = 0.6
+            add(SCNCone(topRadius: 0.0, bottomRadius: 0.17, height: 0.85), gold, SIMD3(0, 1.72, 0.55), euler: SIMD3(0.45, 0, 0))
+            for k in 0..<4 {
+                let fk = Float(k)
+                add(SCNTorus(ringRadius: CGFloat(0.15 - 0.03 * fk), pipeRadius: 0.018), mat(0xFF9F2E), SIMD3(0, 1.55 + 0.17 * fk, 0.47 + 0.08 * fk),
+                    euler: SIMD3(0.45 + 0.25, 0, 0.2))
+            }
+            for s: Float in [-1, 1] {
+                add(SCNPyramid(width: 0.32, height: 0.36, length: 0.1), mat(0xF4F0FF), SIMD3(s * 0.55, 1.62, 0.15), euler: SIMD3(0, 0, -s * 0.5))
+            }
+        case .crown:
+            let gold = mat(0xFFC93C, roughness: 0.25)
+            gold.metalness.contents = 0.7
+            add(SCNTube(innerRadius: 0.52, outerRadius: 0.56, height: 0.22), gold, SIMD3(0, 1.82, -0.25), euler: SIMD3(-0.15, 0, 0))
+            for k in 0..<7 {
+                let az = Float(k) / 7 * 2 * .pi
+                let p = SIMD3<Float>(0.54 * sin(az), 2.02 - 0.15 * cos(az) * 0.3, -0.25 + 0.54 * cos(az) - 0.03)
+                add(SCNCone(topRadius: 0, bottomRadius: 0.09, height: 0.24), gold, p)
+                add(SCNSphere(radius: 0.035), mat(0xFF5FD2, roughness: 0.2), p + SIMD3(0, 0.13, 0))
             }
         }
         return node

@@ -68,7 +68,7 @@ final class KidStage {
     // MARK: Aufbau
 
     /// Zieht das Kind an: Frisur, Augen, Kleidung und Schminke.
-    func configure(kid: Kid, hair: HairSuggestion, design: DesignID?, visibleSteps: Int?) {
+    func configure(kid: Kid, hair: HairSuggestion, design: DesignID?, visibleSteps: Int?, mood: FaceMood = .smile) {
         let newHairKey = "\(kid)|\(hair.style)|\(hair.color)|\(String(describing: hair.streak))|\(String(describing: hair.accessory))"
         if newHairKey != hairKey || self.kid != kid {
             hairKey = newHairKey
@@ -76,10 +76,10 @@ final class KidStage {
             rebuildHair(kid: kid, hair: hair)
             shirtMaterial.diffuse.contents = kid == .girl ? UIColor(hex: 0x7A3FC2) : UIColor(hex: 0xE2741E)
         }
-        let newPaintKey = "\(design?.rawValue ?? "-")|\(visibleSteps ?? -1)|\(kid)"
+        let newPaintKey = "\(design?.rawValue ?? "-")|\(visibleSteps ?? -1)|\(kid)|\(mood)"
         if newPaintKey != paintKey {
             paintKey = newPaintKey
-            skinMaterial.diffuse.contents = DesignTexture.image(design: design, visibleSteps: visibleSteps, kid: kid)
+            skinMaterial.diffuse.contents = DesignTexture.image(design: design, visibleSteps: visibleSteps, kid: kid, mood: mood)
         }
     }
 

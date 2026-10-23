@@ -5,6 +5,7 @@ enum DesignID: String, CaseIterable, Identifiable {
     case ghostCute, ghostFunny, ghostScary
     case cat, cyclops, pumpkin, witch, devil, mummy, spiderweb, bat, batSwarm
     case vampire, werewolf, skeleton, sugarSkull, frankenstein
+    case zombie, dragon, unicorn, mushroom, pumpkinPrincess, clown
     var id: String { rawValue }
 }
 
@@ -74,8 +75,21 @@ enum HairStyle {
     case short, spiky, slicked, wild, mane, pigtails, long, buns, ponytail, flatTop, bandaged, braids
 }
 
+/// Gesichtsausdruck des 3D-Modells.
+enum FaceMood: String, CaseIterable, Identifiable {
+    case smile, neutral, grumpy
+    var id: String { rawValue }
+    var emoji: String {
+        switch self {
+        case .smile: "😊"
+        case .neutral: "😐"
+        case .grumpy: "😠"
+        }
+    }
+}
+
 enum Accessory {
-    case catEars, witchHat, horns, bow, flowers
+    case catEars, witchHat, horns, bow, flowers, unicornHorn, crown
 }
 
 /// Ein Frisur-Vorschlag passend zum Design. Das 3D-Modell trägt ihn.
