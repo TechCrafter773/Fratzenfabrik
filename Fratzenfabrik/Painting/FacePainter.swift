@@ -45,6 +45,11 @@ enum FacePainter {
         case .mushroom: mushroom
         case .pumpkinPrincess: pumpkinPrincess
         case .clown: clown
+        case .clawMarks: clawMarks
+        case .bloodTears: bloodTears
+        case .vampireBite: vampireBite
+        case .brokenDoll: brokenDoll
+        case .spiderLashes: spiderLashes
         case .cyclops: cyclops
         case .devil: devil
         case .mummy: mummy
@@ -1395,6 +1400,210 @@ enum FacePainter {
             p.fill(diamonds, Paint.turquoise.color, opacity: 0.97, soft: 0.004)
             p.stroke(brows, Paint.yellow.color, width: 0.05)
             p.fill([circle(pt(-0.78, 0.55), 0.13), circle(pt(0.78, 0.55), 0.13)], Paint.red.color, opacity: 0.75, soft: 0.03)
+        },
+    ]
+
+    // MARK: - 🩸 Schnelle Looks
+
+    private static let blood = Color(hex: 0xC8102E)
+    private static let darkBlood = Color(hex: 0x6E0A1A)
+
+    static let clawMarks: [Layer] = [
+        { p in
+            let f = p.face
+            let lines: [(CGFloat, CGFloat, CGFloat)] = [(0.14, 0.0, 0.065), (0.28, 0.08, 0.075), (0.42, 0.03, 0.055)]
+            let streaks = lines.map { x, dy, w in
+                bloodStreak(pt(x, f.browY - 0.88 + dy), pt(x - 0.02, f.browY - 0.3 + dy * 0.5), width: w)
+            }
+            p.fill(streaks, FacePainter.blood, opacity: 0.92, soft: 0.006)
+            p.fill(lines.map { x, dy, w in
+                bloodStreak(pt(x + w * 0.15, f.browY - 0.8 + dy), pt(x - 0.01, f.browY - 0.36 + dy * 0.5), width: w * 0.4, drop: false)
+            }, FacePainter.darkBlood, opacity: 0.45, soft: 0.006)
+        },
+        { p in
+            let f = p.face
+            let e = f.leftEye
+            let around = p.without(f.eyeHoles(padX: 0.02, padY: 0.02))
+            around.fill(ellipse(pt(e.center.x - 0.16, e.center.y + 0.3), 0.24, 0.26), FacePainter.blood, opacity: 0.6, soft: 0.07)
+            around.fill(spatter(around: pt(e.center.x - 0.28, e.center.y + 0.2), radius: 0.22, count: 14, seed: 3),
+                        FacePainter.blood, opacity: 0.8, soft: 0.004)
+            let claws = (0..<4).map { k -> Path in
+                let x = e.center.x - 0.26 + CGFloat(k) * 0.12
+                let length: CGFloat = [0.55, 0.72, 0.62, 0.45][k]
+                return bloodStreak(pt(x, e.center.y + e.halfHeight + 0.06), pt(x - 0.03, e.center.y + e.halfHeight + 0.06 + length), width: 0.06)
+            }
+            around.fill(claws, FacePainter.blood, opacity: 0.92, soft: 0.006)
+        },
+        { p in
+            let f = p.face
+            let m = f.mouthCenter
+            p.fill(f.mouthPath(), FacePainter.blood, opacity: 0.95, soft: 0.006)
+            let corner = pt(m.x - f.mouthHalfWidth + 0.02, m.y + 0.02)
+            p.fill(circle(corner, 0.07), FacePainter.blood, opacity: 0.75, soft: 0.03)
+            p.fill([bloodStreak(corner, pt(corner.x + 0.02, corner.y + 0.4), width: 0.065),
+                    bloodStreak(pt(corner.x + 0.05, corner.y), pt(corner.x + 0.07, corner.y + 0.22), width: 0.035)],
+                   FacePainter.blood, opacity: 0.93, soft: 0.005)
+            p.fill(spatter(around: pt(corner.x, corner.y + 0.15), radius: 0.14, count: 8, seed: 9), FacePainter.blood, opacity: 0.8, soft: 0.003)
+        },
+    ]
+
+    static let bloodTears: [Layer] = [
+        { p in
+            let f = p.face
+            p.without(f.eyeHoles(padX: 0.02, padY: 0.02))
+                .fill(f.eyes.map { ellipse(pt($0.center.x, $0.center.y + 0.02), $0.halfWidth + 0.19, $0.halfHeight + 0.17) },
+                      Color(hex: 0x4A1620), opacity: 0.72, soft: 0.08)
+        },
+        { p in
+            let f = p.face
+            var tears: [Path] = []
+            for e in f.eyes {
+                let s: CGFloat = e.center.x < 0 ? -1 : 1
+                let y0 = e.center.y + e.halfHeight + 0.07
+                tears.append(bloodStreak(pt(e.center.x - s * 0.04, y0), pt(e.center.x - s * 0.06, y0 + 0.78), width: 0.06))
+                tears.append(bloodStreak(pt(e.center.x + s * 0.1, y0 - 0.01), pt(e.center.x + s * 0.12, y0 + 0.45), width: 0.045))
+            }
+            p.without(f.eyeHoles(padX: 0.02, padY: 0.02)).fill(tears, FacePainter.blood, opacity: 0.93, soft: 0.005)
+        },
+        { p in
+            let f = p.face
+            let m = f.mouthCenter
+            p.fill(f.mouthPath(), FacePainter.darkBlood, opacity: 0.95, soft: 0.006)
+            p.fill(bloodStreak(pt(m.x + 0.05, f.mouthBottom - 0.03), pt(m.x + 0.06, f.mouthBottom + 0.22), width: 0.045),
+                   FacePainter.darkBlood, opacity: 0.95, soft: 0.004)
+        },
+    ]
+
+    static let vampireBite: [Layer] = [
+        { p in
+            let f = p.face
+            p.without(f.eyeHoles()).without(f.mouthPath()).fill(f.faceOval(), Paint.white.color, opacity: 0.45, soft: 0.05)
+        },
+        { p in
+            let f = p.face
+            p.without(f.eyeHoles(padY: 0.02))
+                .fill(f.eyes.map { ellipse(pt($0.center.x, $0.center.y + 0.14), $0.halfWidth + 0.1, 0.12) }, Paint.purple.color, opacity: 0.45, soft: 0.06)
+            let contour = [-1.0, 1.0].map { (s: CGFloat) in
+                curve(pt(s * 0.95, 0.35), pt(s * 0.75, 0.62), pt(s * 0.42, 0.78))
+            }
+            p.stroke(contour, Color(hex: 0x6A5A7A), width: 0.12, opacity: 0.45, soft: 0.06)
+        },
+        { p in
+            let f = p.face
+            let a = pt(f.jawHalfWidth * 0.82, f.mouthCenter.y + 0.42)
+            let b = pt(a.x + 0.17, a.y - 0.1)
+            p.fill([circle(a, 0.11), circle(b, 0.11)], FacePainter.blood, opacity: 0.35, soft: 0.05)
+            p.fill([bloodStreak(a, pt(a.x + 0.01, a.y + 0.3), width: 0.05), bloodStreak(b, pt(b.x + 0.01, b.y + 0.2), width: 0.04)],
+                   FacePainter.blood, opacity: 0.92, soft: 0.004)
+            p.fill([circle(a, 0.035), circle(b, 0.035)], FacePainter.darkBlood, soft: 0.003)
+        },
+        { p in
+            let f = p.face
+            let m = f.mouthCenter
+            p.fill(f.mouthPath(), FacePainter.blood, opacity: 0.95, soft: 0.006)
+            let corner = pt(m.x + f.mouthHalfWidth - 0.03, m.y + 0.02)
+            p.fill(bloodStreak(corner, pt(corner.x + 0.01, corner.y + 0.3), width: 0.05), FacePainter.blood, opacity: 0.93, soft: 0.004)
+        },
+    ]
+
+    static let brokenDoll: [Layer] = [
+        { p in
+            let f = p.face
+            p.without(f.eyeHoles()).fill(f.faceOval(), Paint.white.color, opacity: 0.72, soft: 0.05)
+            p.fill([circle(pt(-0.66, 0.6), 0.2), circle(pt(0.66, 0.6), 0.2)], Paint.pink.color, opacity: 0.65, soft: 0.07)
+        },
+        { p in
+            let f = p.face
+            var lashes: [Path] = []
+            for e in f.eyes {
+                let s: CGFloat = e.center.x < 0 ? -1 : 1
+                let rx = e.halfWidth + 0.05, ry = e.halfHeight + 0.05
+                for k in 0..<6 {
+                    let a = CGFloat(30 + k * 24) * .pi / 180
+                    let base = pt(e.center.x + cos(a) * rx * s, e.center.y + sin(a) * ry)
+                    let length: CGFloat = 0.13 + 0.07 * sin(CGFloat(k) / 5 * .pi)
+                    lashes.append(line(base, pt(base.x + cos(a) * s * 0.05, base.y + length)))
+                }
+                for k in 0..<3 {
+                    let a = CGFloat(-20 - k * 22) * .pi / 180
+                    let base = pt(e.center.x + cos(a) * rx * s, e.center.y + sin(a) * ry)
+                    lashes.append(line(base, pt(base.x + s * 0.09, base.y - 0.12)))
+                }
+            }
+            p.without(f.eyeHoles(padX: 0.0, padY: 0.0)).stroke(lashes, Paint.black.color, width: 0.022)
+        },
+        { p in
+            let f = p.face
+            let m = f.mouthCenter
+            p.fill(f.mouthPath(), Paint.white.color, opacity: 0.8, soft: 0.01)
+            let heart = [circle(pt(m.x - 0.07, m.y - 0.02), 0.08), circle(pt(m.x + 0.07, m.y - 0.02), 0.08),
+                         polygon([pt(m.x - 0.148, m.y), pt(m.x + 0.148, m.y), pt(m.x, m.y + 0.17)])]
+            p.fill(heart, Paint.red.color, opacity: 0.96, soft: 0.004)
+        },
+        { p in
+            let f = p.face
+            let e = f.leftEye
+            let start = pt(e.center.x - e.halfWidth - 0.04, e.center.y - 0.05)
+            var crack = Path()
+            crack.move(to: start)
+            crack.addLine(to: pt(start.x - 0.08, start.y - 0.25))
+            crack.addLine(to: pt(start.x + 0.04, start.y - 0.45))
+            crack.addLine(to: pt(start.x - 0.06, start.y - 0.72))
+            crack.addLine(to: pt(start.x + 0.08, start.y - 0.95))
+            var down = Path()
+            down.move(to: pt(e.center.x - 0.1, e.center.y + e.halfHeight + 0.06))
+            down.addLine(to: pt(e.center.x - 0.18, e.center.y + 0.38))
+            down.addLine(to: pt(e.center.x - 0.08, e.center.y + 0.55))
+            down.addLine(to: pt(e.center.x - 0.2, e.center.y + 0.8))
+            let branches = [line(pt(start.x + 0.04, start.y - 0.45), pt(start.x + 0.2, start.y - 0.5)),
+                            line(pt(e.center.x - 0.08, e.center.y + 0.55), pt(e.center.x + 0.06, e.center.y + 0.64)),
+                            line(pt(start.x - 0.06, start.y - 0.72), pt(start.x - 0.2, start.y - 0.76))]
+            let cracks = [crack, down] + branches
+            p.stroke(cracks.map { $0.applying(CGAffineTransform(translationX: 0.012, y: 0.008)) }, Color(hex: 0xD8D4DE), width: 0.014, opacity: 0.9)
+            p.without(f.eyeHoles()).stroke(cracks, Paint.black.color, width: 0.016)
+        },
+    ]
+
+    static let spiderLashes: [Layer] = [
+        { p in
+            let f = p.face
+            let around = p.without(f.eyeHoles(padX: 0.02, padY: 0.02))
+            around.fill(f.eyes.map { ellipse($0.center, $0.halfWidth + 0.2, $0.halfHeight + 0.18) }, Paint.purple.color, opacity: 0.55, soft: 0.08)
+            around.fill(f.eyes.map { ellipse($0.center, $0.halfWidth + 0.1, $0.halfHeight + 0.09) }, Paint.black.color, opacity: 0.75, soft: 0.04)
+        },
+        { p in
+            let f = p.face
+            var legs: [Path] = []
+            for e in f.eyes {
+                let s: CGFloat = e.center.x < 0 ? -1 : 1
+                let rx = e.halfWidth + 0.07, ry = e.halfHeight + 0.07
+                for k in 0..<5 {
+                    let a = CGFloat(25 + k * 32) * .pi / 180
+                    let base = pt(e.center.x + cos(a) * rx * s, e.center.y + sin(a) * ry)
+                    let out = cos(a) * s
+                    let knee = pt(base.x + out * 0.14, base.y + 0.06)
+                    let foot = pt(knee.x + out * 0.05, knee.y + 0.2)
+                    var leg = Path()
+                    leg.move(to: base)
+                    leg.addLine(to: knee)
+                    leg.addLine(to: foot)
+                    legs.append(leg)
+                }
+                for k in 0..<3 {
+                    let a = CGFloat(-15 - k * 25) * .pi / 180
+                    let base = pt(e.center.x + cos(a) * rx * s, e.center.y + sin(a) * ry)
+                    let knee = pt(base.x + s * 0.1, base.y - 0.1)
+                    var leg = Path()
+                    leg.move(to: base)
+                    leg.addLine(to: knee)
+                    leg.addLine(to: pt(knee.x + s * 0.1, knee.y + 0.04))
+                    legs.append(leg)
+                }
+            }
+            p.without(f.eyeHoles(padX: 0.0, padY: 0.0)).stroke(legs, Paint.black.color, width: 0.02)
+        },
+        { p in
+            p.fill(p.face.mouthPath(), Color(hex: 0x3A1030), opacity: 0.95, soft: 0.006)
         },
     ]
 }

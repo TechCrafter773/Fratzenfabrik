@@ -6,6 +6,7 @@ enum DesignID: String, CaseIterable, Identifiable {
     case cat, cyclops, pumpkin, witch, devil, mummy, spiderweb, bat, batSwarm
     case vampire, werewolf, skeleton, sugarSkull, frankenstein
     case zombie, dragon, unicorn, mushroom, pumpkinPrincess, clown
+    case clawMarks, bloodTears, vampireBite, brokenDoll, spiderLashes
     var id: String { rawValue }
 }
 
@@ -119,6 +120,8 @@ struct FaceDesign: Identifiable, Hashable {
     var hairBoy: HairSuggestion
     /// Was beim Mund-Aufreißen herausfliegt.
     var mouthEmojis: [String]
+    /// „Schnelle Looks“: wenig Farbe, wenige Minuten.
+    var quick = false
 
     func hair(for kid: Kid) -> HairSuggestion { kid == .girl ? hairGirl : hairBoy }
 

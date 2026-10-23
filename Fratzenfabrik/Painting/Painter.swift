@@ -143,3 +143,30 @@ func flame(_ base: CGPoint, _ h: CGFloat, _ w: CGFloat) -> Path {
     p.closeSubpath()
     return p
 }
+
+/// Blut- oder Farbspur: oben schmal, unten breiter, am Ende ein Tropfen.
+func bloodStreak(_ a: CGPoint, _ b: CGPoint, width w: CGFloat, drop: Bool = true) -> Path {
+    let dx = b.x - a.x, dy = b.y - a.y
+    let len = max(hypot(dx, dy), 0.001)
+    let ux = dx / len, uy = dy / len
+    let nx = -uy, ny = ux
+    let mid = pt((a.x + b.x) / 2, (a.y + b.y) / 2)
+    var p = Path()
+    p.move(to: pt(a.x + nx * w * 0.2, a.y + ny * w * 0.2))
+    p.addQuadCurve(to: pt(b.x + nx * w * 0.5, b.y + ny * w * 0.5), control: pt(mid.x + nx * w * 0.55, mid.y + ny * w * 0.55))
+    p.addQuadCurve(to: pt(b.x - nx * w * 0.5, b.y - ny * w * 0.5), control: pt(b.x + ux * w * 0.9, b.y + uy * w * 0.9))
+    p.addQuadCurve(to: pt(a.x - nx * w * 0.2, a.y - ny * w * 0.2), control: pt(mid.x - nx * w * 0.45, mid.y - ny * w * 0.45))
+    p.closeSubpath()
+    if drop { p.addPath(circle(pt(b.x + ux * w * 0.55, b.y + uy * w * 0.55), w * 0.62)) }
+    return p
+}
+
+/// Kleine Farbspritzer rund um einen Punkt (reproduzierbar).
+func spatter(around c: CGPoint, radius: CGFloat, count: Int, seed: Int) -> [Path] {
+    (0..<count).map { i in
+        let a = CGFloat(i * 137 + seed * 31).truncatingRemainder(dividingBy: 360) * .pi / 180
+        let d = radius * (0.4 + 0.6 * CGFloat((i * 53 + seed * 17) % 100) / 100)
+        let r = 0.008 + 0.012 * CGFloat((i * 29 + seed) % 10) / 10
+        return circle(pt(c.x + cos(a) * d, c.y + sin(a) * d), r)
+    }
+}

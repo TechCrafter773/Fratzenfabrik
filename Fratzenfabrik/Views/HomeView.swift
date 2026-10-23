@@ -3,12 +3,14 @@ import SwiftUI
 struct HomeView: View {
     @State private var filter: Difficulty?
     @State private var kidFilter: Kid?
+    @State private var quickOnly = false
     @State private var mirror: MirrorLaunch?
     @State private var path: [FaceDesign] = []
 
     private var designs: [FaceDesign] {
         DesignCatalog.all.filter {
             (filter == nil || $0.difficulty == filter) && (kidFilter == nil || $0.kids.contains(kidFilter!))
+                && (!quickOnly || $0.quick)
         }
     }
 
@@ -56,6 +58,7 @@ struct HomeView: View {
                         }
                         .animation(.spring(response: 0.4, dampingFraction: 0.7), value: filter)
                         .animation(.spring(response: 0.4, dampingFraction: 0.7), value: kidFilter)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.7), value: quickOnly)
 
                         SafetyCard()
 
@@ -100,6 +103,7 @@ struct HomeView: View {
     private var difficultyBar: some View {
         ScrollView(.horizontal) {
             HStack(spacing: 10) {
+                FilterChip(title: "🩸 Schnelle Looks", selected: quickOnly) { quickOnly.toggle() }
                 FilterChip(title: "Alle Stufen", selected: filter == nil) { filter = nil }
                 ForEach(Difficulty.allCases) { level in
                     FilterChip(title: "\(level.pumpkins) \(level.label)", selected: filter == level) {
