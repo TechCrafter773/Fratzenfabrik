@@ -9,7 +9,8 @@ enum HairBuilder {
         var thickness: Float
         var volume: Float
         var widowsPeak: Bool = false
-        var roughness: CGFloat = 0.45
+        /// Oben platt abschneiden (Flat-Top).
+        var flatTop: Float? = nil
     }
 
     static func build(_ hair: HairSuggestion, kid: Kid, mesh: HeadMesh) -> SCNNode {
@@ -31,6 +32,34 @@ enum HairBuilder {
         func sphere(_ r: CGFloat, _ p: SIMD3<Float>, mat: SCNMaterial? = nil, scale: SIMD3<Float> = .one) {
             add(SCNSphere(radius: r), p, mat: mat, scale: scale)
         }
+        /// Spitz zulaufende Haarsträhne: breit an `base`, Spitze in Richtung `dir`.
+        func tuft(from base: SIMD3<Float>, toward dir: SIMD3<Float>, length: Float, radius: Float) {
+            let cone = SCNCone(topRadius: CGFloat(radius), bottomRadius: CGFloat(radius * 0.12), height: CGFloat(length))
+            cone.materials = [material]
+            let n = SCNNode(geometry: cone)
+            let d = simd_normalize(dir)
+            n.simdPosition = base + d * (length / 2)
+            n.simdOrientation = simd_quatf(from: SIMD3<Float>(0, 1, 0), to: -d)
+            node.addChildNode(n)
+        }
+        /// Strähne, die aus der Kopfhaut nach außen wächst (Spitze außen).
+        func spike(at p: SIMD3<Float>, toward dir: SIMD3<Float>, length: Float, radius: Float) {
+            let cone = SCNCone(topRadius: 0, bottomRadius: CGFloat(radius), height: CGFloat(length))
+            cone.materials = [material]
+            let n = SCNNode(geometry: cone)
+            let d = simd_normalize(dir)
+            n.simdPosition = p + d * (length * 0.42)
+            n.simdOrientation = simd_quatf(from: SIMD3<Float>(0, 1, 0), to: d)
+            node.addChildNode(n)
+        }
+        func scalpPoint(_ rng: inout SeededRandom, thetaMax: Float) -> (SIMD3<Float>, SIMD3<Float>)? {
+            let theta = Float(rng.next(0.05, Double(thetaMax)))
+            let phi = Float(rng.next(-3.14, 3.14))
+            let dir = SIMD3<Float>(sin(theta) * sin(phi), cos(theta), sin(theta) * cos(phi))
+            let p = HeadMesh.surface(dir)
+            guard p.y > HairBuilder.hairline(phi: phi, widowsPeak: false) + 0.12 else { return nil }
+            return (p, simd_normalize(p - HeadMesh.center))
+        }
         var rng = SeededRandom(seed: 7)
 
         switch hair.style {
@@ -40,40 +69,32 @@ enum HairBuilder {
             material.roughness.contents = 0.22
             node.addChildNode(shell(mesh, Shell(thickness: 0.045, volume: 0.05, widowsPeak: true), material))
         case .spiky:
-            node.addChildNode(shell(mesh, Shell(thickness: 0.08, volume: 0.1), material))
-            for i in 0..<18 {
-                let t = Float(i) / 18
-                let phi = Float(i) * 2.4
-                let theta = 0.15 + 0.85 * sqrt(t)
-                let dir = simd_normalize(SIMD3<Float>(sin(theta) * sin(phi), cos(theta) + 0.05, sin(theta) * cos(phi) - 0.1))
-                let p = HeadMesh.surface(dir)
-                let normal = simd_normalize(p - HeadMesh.center)
-                let cone = SCNCone(topRadius: 0, bottomRadius: 0.17, height: 0.55)
-                cone.materials = [material]
-                let n = SCNNode(geometry: cone)
-                n.simdPosition = p + normal * 0.28
-                n.simdOrientation = simd_quatf(from: SIMD3<Float>(0, 1, 0), to: normal)
-                node.addChildNode(n)
+            node.addChildNode(shell(mesh, Shell(thickness: 0.09, volume: 0.12), material))
+            var placed = 0
+            while placed < 30 {
+                guard let hit = scalpPoint(&rng, thetaMax: 1.0) else { continue }
+                let (p, normal) = hit
+                let lean = SIMD3<Float>(Float(rng.next(-0.2, 0.2)), 0.25, Float(rng.next(-0.35, 0.05)))
+                spike(at: p + normal * 0.1, toward: normal + lean, length: Float(rng.next(0.45, 0.7)), radius: Float(rng.next(0.11, 0.16)))
+                placed += 1
             }
         case .wild:
-            node.addChildNode(shell(mesh, Shell(thickness: 0.1, volume: 0.25), material))
-            for _ in 0..<52 {
-                let theta = Float(rng.next(0.1, 1.45))
-                let phi = Float(rng.next(-3.14, 3.14))
-                let dir = SIMD3<Float>(sin(theta) * sin(phi), cos(theta), sin(theta) * cos(phi))
-                let p = HeadMesh.surface(dir)
-                guard p.y > HairBuilder.hairline(phi: phi, widowsPeak: false) + 0.15 else { continue }
-                let normal = simd_normalize(p - HeadMesh.center)
-                sphere(CGFloat(rng.next(0.2, 0.33)), p + normal * Float(rng.next(0.12, 0.3)))
+            node.addChildNode(shell(mesh, Shell(thickness: 0.1, volume: 0.22), material))
+            var placed = 0
+            while placed < 75 {
+                guard let hit = scalpPoint(&rng, thetaMax: 1.55) else { continue }
+                let (p, normal) = hit
+                let droop = SIMD3<Float>(Float(rng.next(-0.4, 0.4)), -0.5, Float(rng.next(-0.4, 0.4)))
+                spike(at: p + normal * 0.1, toward: normal + droop, length: Float(rng.next(0.45, 0.85)), radius: Float(rng.next(0.13, 0.21)))
+                placed += 1
             }
         case .pigtails:
             node.addChildNode(shell(mesh, Shell(thickness: 0.08, volume: 0.1), material))
-            for s: Float in [-1, 1] {
-                sphere(0.1, SIMD3(s * 1.05, 0.78, -0.55), mat: accent)
-                for i in 0..<6 {
-                    let fi = Float(i)
-                    sphere(CGFloat(0.27 - 0.025 * fi), SIMD3(s * (1.18 + 0.07 * fi), 0.65 - 0.27 * fi, -0.62 + 0.02 * fi))
-                }
+            for side: Float in [-1, 1] {
+                let tie = SIMD3<Float>(side * 1.08, 0.78, -0.55)
+                tuft(from: tie, toward: SIMD3(side * 0.5, -1, -0.15), length: 1.5, radius: 0.27)
+                tuft(from: tie, toward: SIMD3(side * 0.25, -1, -0.3), length: 1.25, radius: 0.2)
+                sphere(0.11, tie, mat: accent)
             }
         case .long:
             node.addChildNode(shell(mesh, Shell(thickness: 0.09, volume: 0.12), material))
@@ -94,14 +115,13 @@ enum HairBuilder {
             }
         case .ponytail:
             node.addChildNode(shell(mesh, Shell(thickness: 0.08, volume: 0.1), material))
-            sphere(0.13, SIMD3(0, 1.05, -1.4), mat: accent)
-            for i in 0..<7 {
-                let fi = Float(i)
-                sphere(CGFloat(0.31 - 0.025 * fi), SIMD3(0, 0.9 - 0.33 * fi, -1.62 - 0.06 * sin(fi)))
-            }
+            let tie = SIMD3<Float>(0, 1.05, -1.38)
+            tuft(from: tie, toward: SIMD3(0, -1, -0.35), length: 1.9, radius: 0.33)
+            tuft(from: tie, toward: SIMD3(0.18, -1, -0.5), length: 1.6, radius: 0.24)
+            tuft(from: tie, toward: SIMD3(-0.18, -1, -0.5), length: 1.6, radius: 0.24)
+            sphere(0.14, tie, mat: accent)
         case .flatTop:
-            node.addChildNode(shell(mesh, Shell(thickness: 0.08, volume: 0.06), material))
-            add(SCNBox(width: 2.15, height: 0.65, length: 2.35, chamferRadius: 0.07), SIMD3(0, 1.72, -0.22))
+            node.addChildNode(shell(mesh, Shell(thickness: 0.1, volume: 0.6, flatTop: 2.0), material))
         case .bandaged:
             for (y, tilt) in [(Float(1.62), Float(0.1)), (1.32, -0.12), (1.02, 0.14), (1.84, 0.0), (0.72, -0.08)] {
                 let rel = (y - HeadMesh.center.y) / HeadMesh.ryTop
@@ -180,7 +200,9 @@ enum HairBuilder {
             let taper = smoothstep(h, h + 0.3, p.y)
             let thickness = (style.thickness + style.volume * smoothstep(0.5, 1.8, p.y)) * taper
             let n = mesh.normals[i]
-            positions.append(p + n * (thickness + 0.015))
+            var q = p + n * (thickness + 0.015)
+            if let flat = style.flatTop { q.y = min(q.y, flat) }
+            positions.append(q)
             normals.append(n)
             uvs.append(CGPoint(x: CGFloat(phi / (2 * .pi) + 0.5), y: CGFloat(1 - (p.y + 2) / 4)))
             inside.append(p.y > h - 0.02)
@@ -210,26 +232,46 @@ enum HairBuilder {
         return m
     }
 
-    /// Feine Haarsträhnen als Textur – optional mit farbigen Spray-Strähnen.
+    /// Feine Haarsträhnen als Textur: dunkler Ansatz, Glanzband, optional farbige Spray-Strähnen.
+    /// Bewusst deckend gemalt (normaler Mischmodus) – sonst werden die Haare durchsichtig.
     private static func strandTexture(base: UIColor, streak: UIColor?) -> UIImage {
         let size = CGSize(width: 512, height: 512)
         var rng = SeededRandom(seed: 42)
-        return UIGraphicsImageRenderer(size: size).image { ctx in
-            base.setFill()
-            ctx.fill(CGRect(origin: .zero, size: size))
-            for _ in 0..<260 {
+        let format = UIGraphicsImageRendererFormat()
+        format.opaque = true
+        format.scale = 1
+        return UIGraphicsImageRenderer(size: size, format: format).image { ctx in
+            let cg = ctx.cgContext
+            cg.setBlendMode(.normal)
+            cg.setFillColor(base.cgColor)
+            cg.fill(CGRect(origin: .zero, size: size))
+            for _ in 0..<420 {
                 let x = CGFloat(rng.next(0, 512))
-                let w = CGFloat(rng.next(1, 4))
-                let shade = CGFloat(rng.next(-0.18, 0.18))
-                (shade > 0 ? UIColor.white : UIColor.black).withAlphaComponent(abs(shade)).setFill()
-                ctx.fill(CGRect(x: x, y: 0, width: w, height: 512))
+                let w = CGFloat(rng.next(1, 3.5))
+                let shade = CGFloat(rng.next(-0.28, 0.22))
+                cg.setFillColor((shade > 0 ? UIColor.white : UIColor.black).withAlphaComponent(abs(shade)).cgColor)
+                cg.fill(CGRect(x: x, y: 0, width: w, height: 512))
             }
             if let streak {
-                streak.withAlphaComponent(0.9).setFill()
                 for i in 0..<7 {
                     let x = CGFloat(i) * 73 + 20
-                    ctx.fill(CGRect(x: x, y: 0, width: 16, height: 512))
+                    cg.setFillColor(streak.withAlphaComponent(0.92).cgColor)
+                    cg.fill(CGRect(x: x, y: 0, width: 18, height: 512))
                 }
+            }
+            let space = CGColorSpaceCreateDeviceRGB()
+            // Dunklerer Ansatz am Scheitel
+            if let roots = CGGradient(colorsSpace: space, colors: [UIColor.black.withAlphaComponent(0.35).cgColor,
+                                                                  UIColor.black.withAlphaComponent(0).cgColor] as CFArray,
+                                      locations: [0, 1]) {
+                cg.drawLinearGradient(roots, start: .zero, end: CGPoint(x: 0, y: 160), options: [])
+            }
+            // Glanzband wie bei echtem Haar
+            if let sheen = CGGradient(colorsSpace: space, colors: [UIColor.white.withAlphaComponent(0).cgColor,
+                                                                  UIColor.white.withAlphaComponent(0.18).cgColor,
+                                                                  UIColor.white.withAlphaComponent(0).cgColor] as CFArray,
+                                      locations: [0, 0.5, 1]) {
+                cg.drawLinearGradient(sheen, start: CGPoint(x: 0, y: 150), end: CGPoint(x: 0, y: 230), options: [])
             }
         }
     }

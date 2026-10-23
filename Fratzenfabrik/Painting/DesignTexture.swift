@@ -17,6 +17,14 @@ enum TextureSpace {
     /// Das Standardgesicht, abgebildet auf ein Bild dieser Größe.
     static func face(in size: CGSize) -> FaceGeometry {
         var face = FaceGeometry.canonical
+        // Etwas schmaler als der Kopf, damit die Schminke vorne auf den Wangen ausläuft
+        // statt hart an der Kopfseite zu enden. Kleine Augenaussparung: dort sitzen die Augäpfel.
+        face.faceHalfWidth = 0.98
+        face.jawHalfWidth = 0.8
+        for eye in [\FaceGeometry.leftEye, \FaceGeometry.rightEye] {
+            face[keyPath: eye].halfWidth = 0.13
+            face[keyPath: eye].halfHeight = 0.07
+        }
         let s = size.width / width
         face.scale = s
         face.transform = CGAffineTransform(a: s, b: 0, c: 0, d: s, tx: -minX * s, ty: -minY * s)
