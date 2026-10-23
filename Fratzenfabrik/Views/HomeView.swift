@@ -30,20 +30,10 @@ struct HomeView: View {
                             .foregroundStyle(Spook.ghost.opacity(0.85))
                             .rotationEffect(.degrees(-1.5))
 
-                        VStack(spacing: 10) {
-                            Button {
-                                mirror = MirrorLaunch(design: designs.randomElement()?.id ?? .ghostCute)
-                            } label: {
-                                Label("Spuk-Spiegel starten", systemImage: "camera.fill")
-                            }
-                            .buttonStyle(SlimeButtonStyle())
-
-                            Text("Kamera aufs Kind halten und alle Fratzen live anprobieren 👀")
-                                .font(Spook.body(13, weight: .medium))
-                                .foregroundStyle(.white.opacity(0.7))
-                                .multilineTextAlignment(.center)
-                        }
-                        .padding(.top, 6)
+                        Text("Kamera aufs Kind halten und alle Fratzen live anprobieren 👀")
+                            .font(Spook.body(13, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.7))
+                            .multilineTextAlignment(.center)
 
                         filterBar
 
@@ -72,6 +62,7 @@ struct HomeView: View {
                     .frame(height: 90)
                     .ignoresSafeArea(edges: .top)
             }
+            .safeAreaInset(edge: .bottom) { mirrorButton }
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: FaceDesign.self) { design in
                 DesignDetailView(design: design, initialKid: Showcase.kid ?? kidFilter ?? design.preferredKid)
@@ -83,6 +74,36 @@ struct HomeView: View {
         .fullScreenCover(item: $mirror) { launch in
             MirrorView(design: launch.design, stepMode: launch.stepMode)
         }
+    }
+
+    /// Immer sichtbar unten: der große Knopf zum Spuk-Spiegel.
+    private var mirrorButton: some View {
+        Button {
+            mirror = MirrorLaunch(design: designs.randomElement()?.id ?? .ghostCute)
+        } label: {
+            HStack(spacing: 12) {
+                Text("🪞").font(.system(size: 30))
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Spuk-Spiegel")
+                        .font(Spook.title(24))
+                    Text("Live anprobieren")
+                        .font(Spook.body(13, weight: .heavy))
+                        .opacity(0.75)
+                }
+                Image(systemName: "camera.fill").font(.system(size: 22, weight: .bold))
+            }
+            .padding(.vertical, 4)
+        }
+        .buttonStyle(SlimeButtonStyle())
+        .wobble(1.2, speed: 1.8)
+        .padding(.horizontal, 16)
+        .padding(.top, 10)
+        .padding(.bottom, 6)
+        .background(
+            LinearGradient(colors: [.clear, Spook.night.opacity(0.95)], startPoint: .top, endPoint: .center)
+                .ignoresSafeArea()
+        )
+        .accessibilityLabel("Spuk-Spiegel starten")
     }
 
     private var filterBar: some View {
