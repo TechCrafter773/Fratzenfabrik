@@ -4,6 +4,7 @@ struct HomeView: View {
     @State private var filter: Difficulty?
     @State private var kidFilter: Kid?
     @State private var mirror: MirrorLaunch?
+    @State private var path: [FaceDesign] = []
 
     private var designs: [FaceDesign] {
         DesignCatalog.all.filter {
@@ -12,7 +13,7 @@ struct HomeView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ZStack(alignment: .top) {
                 SpookyBackground()
 
@@ -70,7 +71,10 @@ struct HomeView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: FaceDesign.self) { design in
-                DesignDetailView(design: design, initialKid: kidFilter ?? design.preferredKid)
+                DesignDetailView(design: design, initialKid: Showcase.kid ?? kidFilter ?? design.preferredKid)
+            }
+            .onAppear {
+                if let design = Showcase.design, path.isEmpty { path = [design] }
             }
         }
         .fullScreenCover(item: $mirror) { launch in
@@ -244,5 +248,17 @@ struct SafetyCard: View {
                 .strokeBorder(Spook.pumpkin.opacity(0.6), style: StrokeStyle(lineWidth: 2, dash: [8, 6]))
         )
         .padding(.top, 10)
+    }
+}
+
+/// Startparameter für automatische Screenshots (z. B. `-showcaseDesign werewolf -showcaseKid boy -showcaseYaw 0.9`).
+/// Ohne diese Parameter passiert nichts.
+enum Showcase {
+    static var design: FaceDesign? {
+        UserDefaults.standard.string(forKey: "showcaseDesign").flatMap(DesignID.init(rawValue:)).map(DesignCatalog.design)
+    }
+    static var kid: Kid? { UserDefaults.standard.string(forKey: "showcaseKid").flatMap(Kid.init(rawValue:)) }
+    static var yaw: Float? {
+        UserDefaults.standard.object(forKey: "showcaseYaw") == nil ? nil : UserDefaults.standard.float(forKey: "showcaseYaw")
     }
 }

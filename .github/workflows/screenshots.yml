@@ -1,0 +1,61 @@
+name: Screenshots
+
+# Startet die App im iOS-Simulator und fotografiert ausgewählte Designs als 3D-Modell.
+on:
+  workflow_dispatch:
+    inputs:
+      shots:
+        description: "Liste aus design:kind:drehung, mit Leerzeichen getrennt"
+        default: "werewolf:boy:0.6 werewolf:boy:1.3 frankenstein:boy:0.8 witch:girl:0.5 cat:girl:0.4 devil:girl:0.5 pumpkin:girl:0.9 spiderweb:girl:1.4 vampire:boy:0.7 ghostCute:girl:0.3"
+
+jobs:
+  screenshots:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Simulator starten
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)['devices']
+          c=[x for r,l in d.items() if 'iOS' in r for x in l if x['name'].startswith('iPhone') and 'Pro' in x['name'] and 'Max' not in x['name']]
+          c=c or [x for r,l in d.items() if 'iOS' in r for x in l if x['name'].startswith('iPhone')]
+          print(c[-1]['udid'])")
+          echo "UDID=$UDID" >> "$GITHUB_ENV"
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+
+      - name: Bauen
+        run: |
+          set -o pipefail
+          mkdir -p build
+          xcodebuild build -project Fratzenfabrik.xcodeproj -scheme Fratzenfabrik -configuration Debug \
+            -destination "id=$UDID" -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO \
+            | tee build/xcodebuild.log | grep -E "error:|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" build/xcodebuild.log
+          xcrun simctl install "$UDID" "$(find build/DerivedData -name 'Fratzenfabrik.app' -path '*iphonesimulator*' | head -1)"
+
+      - name: Screenshots
+        run: |
+          mkdir -p shots
+          xcrun simctl status_bar "$UDID" override --time "09:41" --batteryLevel 100 --cellularBars 4 || true
+          for shot in ${{ inputs.shots }}; do
+            IFS=: read -r design kid yaw <<< "$shot"
+            xcrun simctl terminate "$UDID" com.techcrafter773.fratzenfabrik 2>/dev/null || true
+            xcrun simctl launch "$UDID" com.techcrafter773.fratzenfabrik \
+              -showcaseDesign "$design" -showcaseKid "$kid" -showcaseYaw "$yaw"
+            sleep 9
+            xcrun simctl io "$UDID" screenshot "shots/${design}-${kid}-${yaw}.png"
+          done
+          ls -la shots
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: shots/*.png

@@ -37,6 +37,9 @@ struct DesignDetailView: View {
         .safeAreaInset(edge: .bottom) { liveButtons }
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
+        .onAppear {
+            if let yaw = Showcase.yaw { turn = TurnRequest(yaw: yaw) }
+        }
         .fullScreenCover(item: $mirror) { launch in
             MirrorView(design: launch.design, stepMode: launch.stepMode, step: selectedStep ?? 0, kid: kid)
         }
