@@ -93,33 +93,33 @@ enum HairBuilder {
                 placed += 1
             }
         case .mane:
-            // Werwolf: matter, zotteliger Pelz mit hellen und dunklen Büscheln und Backenbart um das Gesicht
+            // Werwolf: matter, zotteliger Pelz in Brauntönen, schwer nach unten hängend, mit dichtem Backenbart
             material.roughness.contents = 0.9
-            let light = hairMaterial(HairSuggestion(style: .mane, color: hair.streak ?? hair.color, title: "", tip: ""))
-            light.roughness.contents = 0.9
+            let light = hairMaterial(HairSuggestion(style: .mane, color: hair.color.darker(-0.18), title: "", tip: ""))
             let dark = hairMaterial(HairSuggestion(style: .mane, color: hair.color.darker(0.35), title: "", tip: ""))
+            light.roughness.contents = 0.9
             dark.roughness.contents = 0.9
-            let furs = [material, material, light, dark]
-            node.addChildNode(shell(mesh, Shell(thickness: 0.16, volume: 0.32), material))
+            let furs = [material, light, material, dark]
+            node.addChildNode(shell(mesh, Shell(thickness: 0.18, volume: 0.34), material))
             var placed = 0
-            while placed < 170 {
+            while placed < 210 {
                 guard let hit = scalpPoint(&rng, thetaMax: 1.75) else { continue }
                 let (p, normal) = hit
-                let messy = SIMD3<Float>(Float(rng.next(-0.6, 0.6)), Float(rng.next(-1.2, -0.3)), Float(rng.next(-0.6, 0.6)))
-                clump(at: p + normal * 0.1, toward: normal * 0.9 + messy,
-                      length: Float(rng.next(0.45, 1.0)), radius: Float(rng.next(0.07, 0.13)),
+                let messy = SIMD3<Float>(Float(rng.next(-0.45, 0.45)), Float(rng.next(-1.7, -0.8)), Float(rng.next(-0.45, 0.45)))
+                clump(at: p + normal * 0.06, toward: normal * 0.6 + messy,
+                      length: Float(rng.next(0.4, 0.8)), radius: Float(rng.next(0.1, 0.16)),
                       mat: furs[placed % furs.count])
                 placed += 1
             }
-            // Backenbart: Fell rahmt das Gesicht von der Schläfe bis unters Kinn
+            // Backenbart: dichte Fellmasse von der Schläfe bis unters Kinn
             for side: Float in [-1, 1] {
-                for k in 0..<12 {
-                    let y = 0.45 - Float(k) * 0.17
+                for k in 0..<26 {
+                    let y = 0.5 - Float(k) * 0.085
                     let jaw = smoothstep(-0.2, -1.9, y)
-                    let x = side * (HeadMesh.rx * (1 - 0.3 * jaw) * 0.97)
-                    let z = HeadMesh.center.z + 0.2 - 0.25 * jaw
-                    let out = SIMD3<Float>(side * Float(rng.next(0.5, 0.9)), Float(rng.next(-0.9, -0.4)), Float(rng.next(-0.2, 0.25)))
-                    clump(at: SIMD3(x, y, z), toward: out, length: Float(rng.next(0.45, 0.75)), radius: Float(rng.next(0.08, 0.12)),
+                    let x = side * (HeadMesh.rx * (1 - 0.3 * jaw) * 0.95 + Float(rng.next(-0.04, 0.06)))
+                    let z = HeadMesh.center.z + 0.15 - 0.25 * jaw + Float(rng.next(-0.18, 0.12))
+                    let out = SIMD3<Float>(side * Float(rng.next(0.35, 0.7)), Float(rng.next(-1.0, -0.6)), Float(rng.next(-0.2, 0.2)))
+                    clump(at: SIMD3(x, y, z), toward: out, length: Float(rng.next(0.45, 0.7)), radius: Float(rng.next(0.13, 0.18)),
                           mat: furs[k % furs.count])
                 }
             }
