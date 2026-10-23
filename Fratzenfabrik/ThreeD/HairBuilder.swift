@@ -32,16 +32,6 @@ enum HairBuilder {
         func sphere(_ r: CGFloat, _ p: SIMD3<Float>, mat: SCNMaterial? = nil, scale: SIMD3<Float> = .one) {
             add(SCNSphere(radius: r), p, mat: mat, scale: scale)
         }
-        /// Spitz zulaufende Haarsträhne: breit an `base`, Spitze in Richtung `dir`.
-        func tuft(from base: SIMD3<Float>, toward dir: SIMD3<Float>, length: Float, radius: Float) {
-            let cone = SCNCone(topRadius: CGFloat(radius), bottomRadius: CGFloat(radius * 0.12), height: CGFloat(length))
-            cone.materials = [material]
-            let n = SCNNode(geometry: cone)
-            let d = simd_normalize(dir)
-            n.simdPosition = base + d * (length / 2)
-            n.simdOrientation = simd_quatf(from: SIMD3<Float>(0, 1, 0), to: -d)
-            node.addChildNode(n)
-        }
         /// Strähne, die aus der Kopfhaut nach außen wächst (Spitze außen).
         func spike(at p: SIMD3<Float>, toward dir: SIMD3<Float>, length: Float, radius: Float) {
             let cone = SCNCone(topRadius: 0, bottomRadius: CGFloat(radius), height: CGFloat(length))
@@ -49,6 +39,18 @@ enum HairBuilder {
             let n = SCNNode(geometry: cone)
             let d = simd_normalize(dir)
             n.simdPosition = p + d * (length * 0.42)
+            n.simdOrientation = simd_quatf(from: SIMD3<Float>(0, 1, 0), to: d)
+            node.addChildNode(n)
+        }
+        /// Weiches, länglich-rundes Haarbüschel, das in Richtung `dir` herabhängt.
+        func clump(at p: SIMD3<Float>, toward dir: SIMD3<Float>, length: Float, radius: Float) {
+            let blob = SCNSphere(radius: 1)
+            blob.segmentCount = 16
+            blob.materials = [material]
+            let n = SCNNode(geometry: blob)
+            let d = simd_normalize(dir)
+            n.simdScale = SIMD3(radius, length / 2, radius * 0.8)
+            n.simdPosition = p + d * (length * 0.35)
             n.simdOrientation = simd_quatf(from: SIMD3<Float>(0, 1, 0), to: d)
             node.addChildNode(n)
         }
@@ -79,34 +81,29 @@ enum HairBuilder {
                 placed += 1
             }
         case .wild:
-            node.addChildNode(shell(mesh, Shell(thickness: 0.1, volume: 0.22), material))
+            node.addChildNode(shell(mesh, Shell(thickness: 0.12, volume: 0.24), material))
             var placed = 0
-            while placed < 75 {
-                guard let hit = scalpPoint(&rng, thetaMax: 1.55) else { continue }
+            while placed < 95 {
+                guard let hit = scalpPoint(&rng, thetaMax: 1.6) else { continue }
                 let (p, normal) = hit
-                let droop = SIMD3<Float>(Float(rng.next(-0.4, 0.4)), -0.5, Float(rng.next(-0.4, 0.4)))
-                spike(at: p + normal * 0.1, toward: normal + droop, length: Float(rng.next(0.45, 0.85)), radius: Float(rng.next(0.13, 0.21)))
+                // Büschel hängen schwer nach unten und leicht nach außen – zottelig statt stachelig
+                let droop = SIMD3<Float>(Float(rng.next(-0.3, 0.3)), -1.1, Float(rng.next(-0.3, 0.3)))
+                clump(at: p + normal * 0.08, toward: normal * 0.7 + droop,
+                      length: Float(rng.next(0.5, 0.95)), radius: Float(rng.next(0.13, 0.2)))
                 placed += 1
             }
         case .pigtails:
             node.addChildNode(shell(mesh, Shell(thickness: 0.08, volume: 0.1), material))
             for side: Float in [-1, 1] {
-                let tie = SIMD3<Float>(side * 1.08, 0.78, -0.55)
-                tuft(from: tie, toward: SIMD3(side * 0.5, -1, -0.15), length: 1.5, radius: 0.27)
-                tuft(from: tie, toward: SIMD3(side * 0.25, -1, -0.3), length: 1.25, radius: 0.2)
-                sphere(0.11, tie, mat: accent)
+                let tie = SIMD3<Float>(side * 1.12, 0.95, -0.45)
+                sphere(0.24, tie + SIMD3(side * 0.04, 0.03, 0))
+                clump(at: tie, toward: SIMD3(side * 0.18, -1, -0.08), length: 1.7, radius: 0.24)
+                clump(at: tie + SIMD3(0, -0.05, -0.08), toward: SIMD3(side * 0.08, -1, -0.15), length: 1.45, radius: 0.19)
+                add(SCNTorus(ringRadius: 0.13, pipeRadius: 0.045), tie + SIMD3(side * 0.03, -0.12, 0), mat: accent)
             }
         case .long:
             node.addChildNode(shell(mesh, Shell(thickness: 0.09, volume: 0.12), material))
-            for k in 0..<9 {
-                let az = (100 + Float(k) * 20) * .pi / 180
-                let x = 1.08 * sin(az)
-                let z = HeadMesh.center.z + 1.32 * cos(az)
-                add(SCNCapsule(capRadius: 0.25, height: 2.7), SIMD3(x, -0.7, z), euler: SIMD3(0, 0, -x * 0.05))
-            }
-            for s: Float in [-1, 1] {
-                add(SCNCapsule(capRadius: 0.17, height: 2.0), SIMD3(s * 1.04, -0.15, 0.02), euler: SIMD3(0.08, 0, s * 0.06))
-            }
+            node.addChildNode(curtain(material))
         case .buns:
             node.addChildNode(shell(mesh, Shell(thickness: 0.08, volume: 0.1), material))
             for s: Float in [-1, 1] {
@@ -116,10 +113,11 @@ enum HairBuilder {
         case .ponytail:
             node.addChildNode(shell(mesh, Shell(thickness: 0.08, volume: 0.1), material))
             let tie = SIMD3<Float>(0, 1.05, -1.38)
-            tuft(from: tie, toward: SIMD3(0, -1, -0.35), length: 1.9, radius: 0.33)
-            tuft(from: tie, toward: SIMD3(0.18, -1, -0.5), length: 1.6, radius: 0.24)
-            tuft(from: tie, toward: SIMD3(-0.18, -1, -0.5), length: 1.6, radius: 0.24)
-            sphere(0.14, tie, mat: accent)
+            sphere(0.27, tie + SIMD3(0, 0.02, -0.06))
+            clump(at: tie, toward: SIMD3(0, -1, -0.3), length: 2.0, radius: 0.3)
+            clump(at: tie, toward: SIMD3(0.15, -1, -0.45), length: 1.7, radius: 0.22)
+            clump(at: tie, toward: SIMD3(-0.15, -1, -0.45), length: 1.7, radius: 0.22)
+            add(SCNTorus(ringRadius: 0.17, pipeRadius: 0.05), tie + SIMD3(0, -0.05, -0.15), mat: accent, euler: SIMD3(1.2, 0, 0))
         case .flatTop:
             node.addChildNode(shell(mesh, Shell(thickness: 0.1, volume: 0.6, flatTop: 2.0), material))
         case .bandaged:
@@ -222,11 +220,47 @@ enum HairBuilder {
         return SCNNode(geometry: geometry)
     }
 
+    /// Lange Haare als fließender Vorhang um Hinterkopf und Seiten – mit leichten Wellen.
+    private static func curtain(_ material: SCNMaterial) -> SCNNode {
+        let azSteps = 56, ySteps = 34
+        let azFrom: Float = 72 * .pi / 180, azTo: Float = 288 * .pi / 180
+        let yTop: Float = 0.95, yBottom: Float = -2.35
+        var positions: [SIMD3<Float>] = []
+        var normals: [SIMD3<Float>] = []
+        var uvs: [CGPoint] = []
+        for j in 0...ySteps {
+            let y = yTop + (yBottom - yTop) * Float(j) / Float(ySteps)
+            let rel = min(max((y - HeadMesh.center.y) / (y > HeadMesh.center.y ? HeadMesh.ryTop : HeadMesh.ryBottom), -1), 1)
+            let round = sqrt(max(0, 1 - rel * rel))
+            let flare = 0.3 * smoothstep(-0.6, -2.35, y)
+            let rx = max(HeadMesh.rx * round, 0.98) + 0.14 + flare
+            let rz = max(HeadMesh.rz * 1.06 * round, 1.05) + 0.14 + flare
+            for i in 0...azSteps {
+                let az = azFrom + (azTo - azFrom) * Float(i) / Float(azSteps)
+                let wave = 1 + 0.035 * sin(az * 11 + y * 2)
+                positions.append(SIMD3(sin(az) * rx * wave, y, HeadMesh.center.z + cos(az) * rz * wave))
+                normals.append(simd_normalize(SIMD3(sin(az), 0, cos(az))))
+                uvs.append(CGPoint(x: CGFloat(az / (2 * .pi)), y: CGFloat(Float(j) / Float(ySteps))))
+            }
+        }
+        var indices: [UInt32] = []
+        let row = azSteps + 1
+        for j in 0..<ySteps {
+            for i in 0..<azSteps {
+                let a = UInt32(j * row + i), b = a + 1, c = UInt32((j + 1) * row + i), d = c + 1
+                indices += [a, c, b, b, c, d]
+            }
+        }
+        let geometry = SCNGeometry.make(positions: positions, normals: normals, uvs: uvs, indices: indices)
+        geometry.materials = [material]
+        return SCNNode(geometry: geometry)
+    }
+
     private static func hairMaterial(_ hair: HairSuggestion) -> SCNMaterial {
         let m = SCNMaterial()
         m.lightingModel = .physicallyBased
         m.diffuse.contents = strandTexture(base: hair.color, streak: hair.streak)
-        m.roughness.contents = 0.45
+        m.roughness.contents = 0.62
         m.metalness.contents = 0.0
         m.isDoubleSided = true
         return m
