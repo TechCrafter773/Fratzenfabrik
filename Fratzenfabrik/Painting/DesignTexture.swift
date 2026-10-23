@@ -15,7 +15,8 @@ enum TextureSpace {
     }
 
     /// Das Standardgesicht, abgebildet auf ein Bild dieser Größe.
-    static func face(in size: CGSize, mood: FaceMood = .neutral) -> FaceGeometry {
+    /// `live`: für das echte Gesicht (ARKit) – die Schminke reicht bis an den Rand des Gesichtsnetzes.
+    static func face(in size: CGSize, mood: FaceMood = .neutral, live: Bool = false) -> FaceGeometry {
         var face = FaceGeometry.canonical
         // Mundwinkel nach oben (Lächeln) oder unten (Grummeln)
         let bend: CGFloat = mood == .smile ? -0.1 : (mood == .grumpy ? 0.08 : 0)
@@ -25,11 +26,19 @@ enum TextureSpace {
         }
         // Etwas schmaler als der Kopf, damit die Schminke vorne auf den Wangen ausläuft
         // statt hart an der Kopfseite zu enden. Kleine Augenaussparung: dort sitzen die Augäpfel.
-        face.faceHalfWidth = 0.98
-        face.jawHalfWidth = 0.8
-        for eye in [\FaceGeometry.leftEye, \FaceGeometry.rightEye] {
-            face[keyPath: eye].halfWidth = 0.13
-            face[keyPath: eye].halfHeight = 0.07
+        if live {
+            // Großzügig über das ganze Gesicht: Was über den Rand des ARKit-Netzes hinausragt, wird ohnehin nicht gezeigt.
+            face.faceHalfWidth = 1.38
+            face.jawHalfWidth = 1.12
+            face.foreheadTop = -1.8
+            face.chin = 2.2
+        } else {
+            face.faceHalfWidth = 0.98
+            face.jawHalfWidth = 0.8
+            for eye in [\FaceGeometry.leftEye, \FaceGeometry.rightEye] {
+                face[keyPath: eye].halfWidth = 0.13
+                face[keyPath: eye].halfHeight = 0.07
+            }
         }
         let s = size.width / width
         face.scale = s
@@ -82,13 +91,13 @@ enum SkinPainter {
 enum DesignTexture {
     private static var cache: [String: UIImage] = [:]
 
-    static func image(design: DesignID?, visibleSteps: Int? = nil, kid: Kid?, mood: FaceMood = .neutral,
+    static func image(design: DesignID?, visibleSteps: Int? = nil, kid: Kid?, mood: FaceMood = .neutral, live: Bool = false,
                       size: CGSize = TextureSpace.pixelSize) -> UIImage? {
-        let key = "\(design?.rawValue ?? "-")|\(visibleSteps ?? -1)|\(kid?.rawValue ?? "-")|\(mood.rawValue)|\(Int(size.width))"
+        let key = "\(design?.rawValue ?? "-")|\(visibleSteps ?? -1)|\(kid?.rawValue ?? "-")|\(mood.rawValue)|\(live)|\(Int(size.width))"
         if let cached = cache[key] { return cached }
 
         let content = Canvas { ctx, canvasSize in
-            let face = TextureSpace.face(in: canvasSize, mood: mood)
+            let face = TextureSpace.face(in: canvasSize, mood: mood, live: live)
             if let kid { SkinPainter.draw(face, kid: kid, mood: mood, in: ctx, size: canvasSize) }
             if let design { FacePainter.draw(design, face: face, in: ctx, visibleSteps: visibleSteps) }
         }

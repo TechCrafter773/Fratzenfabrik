@@ -116,7 +116,7 @@ struct MirrorView: View {
 
     private func updateARPaint() {
         guard mode == .ar else { return }
-        ar.setPaint(DesignTexture.image(design: design, visibleSteps: visibleSteps, kid: nil), opacity: opacity)
+        ar.setPaint(DesignTexture.image(design: design, visibleSteps: visibleSteps, kid: nil, live: true), opacity: opacity)
     }
 
     // MARK: Ebenen

@@ -192,14 +192,14 @@ struct FaceGeometry {
         if !brows.isEmpty {
             geo.browY = clamp(brows.map(\.y).reduce(0, +) / CGFloat(brows.count), -0.6, -0.15)
         }
-        geo.foreheadTop = geo.browY - 1.0
+        geo.foreheadTop = geo.browY - 1.2
 
         let contour = f(lm.contour)
         if contour.count >= 5 {
             let maxY = contour.map(\.y).max() ?? geo.chin
-            geo.chin = clamp(maxY, geo.mouthBottom + 0.25, 2.4)
+            geo.chin = clamp(maxY + 0.06, geo.mouthBottom + 0.25, 2.4)
             let widest = contour.map { abs($0.x) }.max() ?? geo.faceHalfWidth
-            geo.faceHalfWidth = clamp(widest, 0.85, 1.5)
+            geo.faceHalfWidth = clamp(widest + 0.06, 0.85, 1.55)
             let jaw = contour.filter { $0.y > geo.mouthCenter.y - 0.1 }.map { abs($0.x) }.max()
             geo.jawHalfWidth = clamp(jaw ?? geo.faceHalfWidth * 0.8, 0.5, geo.faceHalfWidth)
         }
