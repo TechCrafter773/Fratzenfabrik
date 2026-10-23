@@ -67,8 +67,8 @@ struct MirrorView: View {
             ar.pause()
             camera.stop()
         }
-        .onChange(of: design) { _, _ in
-            SpookAudio.shared.play(.whoosh, volume: 0.55)
+        .onChange(of: design) { _, newDesign in
+            SpookAudio.shared.playCharacter(newDesign)
             updateARPaint()
         }
         .onChange(of: step) { _, _ in

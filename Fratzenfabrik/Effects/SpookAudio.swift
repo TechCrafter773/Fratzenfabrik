@@ -1,7 +1,8 @@
 import AVFoundation
 import SwiftUI
 
-/// Spuk-Sounds: kurze Effekte beim Fratzen-Wechsel, bei geschafften Schritten und beim Foto.
+/// Spuk-Sounds: ein eigener Sound je Fratze beim Wechseln, dazu kurze Effekte für Schritte und Foto.
+/// Die Figuren-Sounds erzeugt `tools/make_character_sounds.py`.
 @MainActor
 final class SpookAudio {
     static let shared = SpookAudio()
@@ -19,14 +20,28 @@ final class SpookAudio {
     enum Effect: String { case whoosh, creak, sparkle }
 
     func play(_ effect: Effect, volume: Float = 0.8) {
+        play(file: effect.rawValue, ext: "wav", volume: volume)
+    }
+
+    /// Der Sound der Figur, in die man sich gerade verwandelt (z. B. Miauen, Heulen, Orgelakkord).
+    func playCharacter(_ design: DesignID, volume: Float = 0.85) {
+        if Bundle.main.url(forResource: "fx_\(design.rawValue)", withExtension: "m4a") != nil {
+            for other in players.values where other.isPlaying { other.stop() }
+            play(file: "fx_\(design.rawValue)", ext: "m4a", volume: volume)
+        } else {
+            play(.whoosh, volume: 0.55)
+        }
+    }
+
+    private func play(file: String, ext: String, volume: Float) {
         guard enabled else { return }
         let player: AVAudioPlayer
-        if let cached = players[effect.rawValue] {
+        if let cached = players[file] {
             player = cached
         } else {
-            guard let url = Bundle.main.url(forResource: effect.rawValue, withExtension: "wav"),
+            guard let url = Bundle.main.url(forResource: file, withExtension: ext),
                   let created = try? AVAudioPlayer(contentsOf: url) else { return }
-            players[effect.rawValue] = created
+            players[file] = created
             player = created
         }
         player.volume = volume
