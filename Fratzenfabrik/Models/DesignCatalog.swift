@@ -362,10 +362,10 @@ enum DesignCatalog {
              "Feiner Pinsel"),
         ]),
         kids: [.boy],
-        hairGirl: HairSuggestion(style: .wild, color: HairColor.brown, streak: HairColor.grey,
+        hairGirl: HairSuggestion(style: .mane, color: HairColor.brown, streak: HairColor.grey,
                                  title: "Wolfsmähne",
                                  tip: "Haare kopfüber kräftig toupieren, graue Spray-Strähnen – je wilder, desto besser."),
-        hairBoy: HairSuggestion(style: .wild, color: HairColor.brown, streak: HairColor.grey,
+        hairBoy: HairSuggestion(style: .mane, color: HairColor.brown, streak: HairColor.grey,
                                 title: "Zottelfell",
                                 tip: "Mit Haarwachs in alle Richtungen zwirbeln und graue Strähnen einsprayen."),
         mouthEmojis: ["🌕", "🐾"]

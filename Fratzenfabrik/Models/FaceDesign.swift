@@ -71,7 +71,7 @@ struct PaintStep: Identifiable {
 // MARK: - Frisuren
 
 enum HairStyle {
-    case short, spiky, slicked, wild, pigtails, long, buns, ponytail, flatTop, bandaged, braids
+    case short, spiky, slicked, wild, mane, pigtails, long, buns, ponytail, flatTop, bandaged, braids
 }
 
 enum Accessory {

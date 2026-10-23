@@ -43,10 +43,10 @@ enum HairBuilder {
             node.addChildNode(n)
         }
         /// Weiches, länglich-rundes Haarbüschel, das in Richtung `dir` herabhängt.
-        func clump(at p: SIMD3<Float>, toward dir: SIMD3<Float>, length: Float, radius: Float) {
+        func clump(at p: SIMD3<Float>, toward dir: SIMD3<Float>, length: Float, radius: Float, mat: SCNMaterial? = nil) {
             let blob = SCNSphere(radius: 1)
             blob.segmentCount = 16
-            blob.materials = [material]
+            blob.materials = [mat ?? material]
             let n = SCNNode(geometry: blob)
             let d = simd_normalize(dir)
             n.simdScale = SIMD3(radius, length / 2, radius * 0.8)
@@ -91,6 +91,37 @@ enum HairBuilder {
                 clump(at: p + normal * 0.08, toward: normal * 0.7 + droop,
                       length: Float(rng.next(0.5, 0.95)), radius: Float(rng.next(0.13, 0.2)))
                 placed += 1
+            }
+        case .mane:
+            // Werwolf: matter, zotteliger Pelz mit hellen und dunklen Büscheln und Backenbart um das Gesicht
+            material.roughness.contents = 0.9
+            let light = hairMaterial(HairSuggestion(style: .mane, color: hair.streak ?? hair.color, title: "", tip: ""))
+            light.roughness.contents = 0.9
+            let dark = hairMaterial(HairSuggestion(style: .mane, color: hair.color.darker(0.35), title: "", tip: ""))
+            dark.roughness.contents = 0.9
+            let furs = [material, material, light, dark]
+            node.addChildNode(shell(mesh, Shell(thickness: 0.16, volume: 0.32), material))
+            var placed = 0
+            while placed < 170 {
+                guard let hit = scalpPoint(&rng, thetaMax: 1.75) else { continue }
+                let (p, normal) = hit
+                let messy = SIMD3<Float>(Float(rng.next(-0.6, 0.6)), Float(rng.next(-1.2, -0.3)), Float(rng.next(-0.6, 0.6)))
+                clump(at: p + normal * 0.1, toward: normal * 0.9 + messy,
+                      length: Float(rng.next(0.45, 1.0)), radius: Float(rng.next(0.07, 0.13)),
+                      mat: furs[placed % furs.count])
+                placed += 1
+            }
+            // Backenbart: Fell rahmt das Gesicht von der Schläfe bis unters Kinn
+            for side: Float in [-1, 1] {
+                for k in 0..<12 {
+                    let y = 0.45 - Float(k) * 0.17
+                    let jaw = smoothstep(-0.2, -1.9, y)
+                    let x = side * (HeadMesh.rx * (1 - 0.3 * jaw) * 0.97)
+                    let z = HeadMesh.center.z + 0.2 - 0.25 * jaw
+                    let out = SIMD3<Float>(side * Float(rng.next(0.5, 0.9)), Float(rng.next(-0.9, -0.4)), Float(rng.next(-0.2, 0.25)))
+                    clump(at: SIMD3(x, y, z), toward: out, length: Float(rng.next(0.45, 0.75)), radius: Float(rng.next(0.08, 0.12)),
+                          mat: furs[k % furs.count])
+                }
             }
         case .pigtails:
             node.addChildNode(shell(mesh, Shell(thickness: 0.08, volume: 0.1), material))
@@ -372,5 +403,13 @@ struct SeededRandom {
         state = state &* 6364136223846793005 &+ 1442695040888963407
         let unit = Double(state >> 11) / Double(1 << 53)
         return lo + (hi - lo) * unit
+    }
+}
+
+extension UIColor {
+    func darker(_ amount: CGFloat) -> UIColor {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        getRed(&r, green: &g, blue: &b, alpha: &a)
+        return UIColor(red: r * (1 - amount), green: g * (1 - amount), blue: b * (1 - amount), alpha: a)
     }
 }
