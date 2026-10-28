@@ -33,6 +33,11 @@ final class SpookAudio {
         }
     }
 
+    /// Spielt einen Sound aus `Sounds/` (m4a), z. B. die Krokodilspiel-Effekte.
+    func play(sound name: String, volume: Float = 0.85) {
+        play(file: name, ext: "m4a", volume: volume)
+    }
+
     private func play(file: String, ext: String, volume: Float) {
         guard enabled else { return }
         let player: AVAudioPlayer
@@ -54,6 +59,8 @@ final class SpookAudio {
 struct SoundToggle: View {
     @AppStorage(SpookAudio.enabledKey) private var soundOn = true
     var size: CGFloat = 44
+
+    init(size: CGFloat = 44) { self.size = size }
 
     var body: some View {
         RoundIconButton(systemName: soundOn ? "speaker.wave.2.fill" : "speaker.slash.fill", size: size) {

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    var onExit: () -> Void = {}
     @State private var filter: Difficulty?
     @State private var kidFilter: Kid?
     @State private var quickOnly = false
@@ -61,6 +62,12 @@ struct HomeView: View {
                 DrippingSlime(height: 22)
                     .frame(height: 90)
                     .ignoresSafeArea(edges: .top)
+
+                HStack {
+                    WorldBackButton(color: Spook.slime, action: onExit)
+                    Spacer()
+                }
+                .padding(.top, 30)
             }
             .safeAreaInset(edge: .bottom) { mirrorButton }
             .toolbar(.hidden, for: .navigationBar)

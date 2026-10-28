@@ -7,7 +7,7 @@ import wave
 import numpy as np
 
 SR = 44100
-OUT = sys.argv[1]
+OUT = sys.argv[1] if len(sys.argv) > 1 else "."
 rng = np.random.default_rng(7)
 
 
@@ -437,8 +437,9 @@ ALL = [ghostCute, ghostFunny, ghostScary, cat, cyclops, pumpkin, witch, devil, m
        vampire, werewolf, skeleton, sugarSkull, frankenstein, zombie, dragon, unicorn, mushroom, pumpkinPrincess,
        clown, clawMarks, bloodTears, vampireBite, brokenDoll, spiderLashes]
 
-only = sys.argv[2:]
-for fn in ALL:
-    if only and fn.__name__ not in only:
-        continue
-    finish(fn.__name__, fn())
+if __name__ == "__main__":
+    only = sys.argv[2:]
+    for fn in ALL:
+        if only and fn.__name__ not in only:
+            continue
+        finish(fn.__name__, fn())

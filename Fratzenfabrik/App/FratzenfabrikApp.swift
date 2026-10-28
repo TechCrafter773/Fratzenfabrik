@@ -4,7 +4,7 @@ import SwiftUI
 struct FratzenfabrikApp: App {
     var body: some Scene {
         WindowGroup {
-            HomeView()
+            RootView()
                 .preferredColorScheme(.dark)
                 .tint(Spook.slime)
         }
