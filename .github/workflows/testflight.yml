@@ -64,6 +64,14 @@ jobs:
             | tee "$RUNNER_TEMP/archive.log" | grep -E "error:|ARCHIVE (SUCCEEDED|FAILED)" || true
           grep -q "ARCHIVE SUCCEEDED" "$RUNNER_TEMP/archive.log"
 
+      - name: Berechtigungen (SharePlay) ins Archiv
+        run: |
+          # Das Archiv ist unsigniert; damit die Cloud-Signatur die Berechtigungen übernimmt,
+          # wird die App vorab ad-hoc mit ihnen signiert.
+          APP="$RUNNER_TEMP/Fratzenfabrik.xcarchive/Products/Applications/Fratzenfabrik.app"
+          codesign --force --sign - --timestamp=none --entitlements Config/Fratzenfabrik.entitlements "$APP"
+          codesign -d --entitlements - "$APP"
+
       - name: Signieren (Cloud-Signatur) & hochladen
         run: |
           set -o pipefail

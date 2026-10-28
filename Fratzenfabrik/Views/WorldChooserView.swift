@@ -14,6 +14,7 @@ enum World {
 
 struct RootView: View {
     @State private var world = World.initial
+    @ObservedObject private var sharePlay = CrocSharePlay.shared
 
     var body: some View {
         ZStack {
@@ -30,6 +31,11 @@ struct RootView: View {
                 CrocHomeView(onExit: { withAnimation { world = .chooser } })
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
+        }
+        // Startet jemand im FaceTime-Anruf das Krokodilspiel, landet man direkt dort.
+        .task { await sharePlay.observeSessions() }
+        .onChange(of: sharePlay.session != nil) { _, active in
+            if active { withAnimation { world = .croc } }
         }
     }
 }
