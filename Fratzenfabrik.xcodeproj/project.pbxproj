@@ -194,7 +194,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Config/Fratzenfabrik-Info.plist";
+				CODE_SIGN_ENTITLEMENTS = Config/Fratzenfabrik.entitlements;
 				INFOPLIST_KEY_CFBundleDisplayName = Fratzenfabrik;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
@@ -233,7 +233,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Config/Fratzenfabrik-Info.plist";
+				CODE_SIGN_ENTITLEMENTS = Config/Fratzenfabrik.entitlements;
 				INFOPLIST_KEY_CFBundleDisplayName = Fratzenfabrik;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";

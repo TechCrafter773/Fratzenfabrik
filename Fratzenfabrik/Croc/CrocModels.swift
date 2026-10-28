@@ -93,7 +93,7 @@ enum CrocRoundReason: String, Codable {
     }
 }
 
-/// Wie die Nachrichten verschickt werden: über WLAN/Bluetooth zum anderen Handy oder direkt auf demselben Handy.
+/// Wie die Nachrichten verschickt werden: übers Internet zum anderen Handy oder direkt auf demselben Handy.
 @MainActor
 protocol CrocTransport: AnyObject {
     func send(_ message: CrocMessage)
