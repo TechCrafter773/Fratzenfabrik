@@ -72,7 +72,7 @@ struct CrocJaws: View {
                 let ey = upper - h * 0.17
                 ctx.fill(Path(ellipseIn: CGRect(x: ex - eyeR * 1.35, y: ey - eyeR * 1.35, width: eyeR * 2.7, height: eyeR * 2.7)), with: gold)
                 ctx.fill(Path(ellipseIn: CGRect(x: ex - eyeR, y: ey - eyeR, width: eyeR * 2, height: eyeR * 2)), with: .color(.white))
-                let slit = eyeR * (0.35 + 0.25 * shut)
+                let slit = eyeR * (0.6 + 0.3 * shut)
                 ctx.fill(Path(roundedRect: CGRect(x: ex - slit / 2, y: ey - eyeR * 0.8, width: slit, height: eyeR * 1.6),
                               cornerRadius: slit / 2), with: .color(Color(hex: 0x2A1200)))
                 ctx.fill(Path(ellipseIn: CGRect(x: ex - eyeR * 0.15, y: ey - eyeR * 0.6, width: eyeR * 0.35, height: eyeR * 0.35)),

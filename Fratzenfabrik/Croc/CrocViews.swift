@@ -38,7 +38,10 @@ struct CrocLogo: View {
 
     var body: some View {
         VStack(spacing: -size * 0.15) {
-            Text("🐊").font(.system(size: size * 1.4)).wobble(6, speed: 3)
+            Text("🐊").font(.system(size: size * 1.4))
+                // Goldenes statt grünes Krokodil
+                .hueRotation(.degrees(-75)).saturation(1.4)
+                .wobble(6, speed: 3)
             Text("KROKODIL")
                 .font(Spook.title(size))
                 .foregroundStyle(LinearGradient(colors: [Color(hex: 0xFFF0A8), Kroko.gold, Kroko.deepGold], startPoint: .top, endPoint: .bottom))
